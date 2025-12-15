@@ -1,0 +1,77 @@
+name: qr_menu_finder
+description: "QR Menu Finder - Firebase Spark Plan & OpenStreetMap Migration"
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+  auto_mappr_annotation: ^2.0.0
+
+  # UI & Essentials
+  cupertino_icons: ^1.0.8
+  flutter_bloc: ^8.1.6
+  go_router: ^14.2.7
+  get_it: ^7.7.0
+  equatable: ^2.0.5
+  dartz: ^0.10.1
+  shared_preferences: ^2.3.4
+  logger: ^2.4.0
+  url_launcher: ^6.3.1
+  image_picker: ^1.1.2
+
+  # 🔥 Firebase (Spark plan safe)
+  firebase_core: ^3.15.2
+  firebase_auth: ^5.7.0
+  cloud_firestore: ^5.6.12
+  firebase_storage: ^12.4.10
+  firebase_analytics: ^11.6.0
+  firebase_messaging: ^15.1.4
+  firebase_app_check: ^0.3.2+10
+
+  # 🌍 OpenStreetMap Integration
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.0
+  geolocator: ^13.0.1
+  permission_handler: ^11.3.1
+
+  # 🧠 AI / OCR
+  google_mlkit_text_recognition: ^0.13.0
+
+  # 🔎 Search - Using Nominatim (OpenStreetMap) for geocoding
+  # No Algolia needed - using OSM Nominatim API via http package
+  meilisearch: ^0.15.0
+
+  # 🎨 UI Enhancements
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  flutter_staggered_animations: ^1.1.1
+
+  # 🧩 Utils
+  flutter_dotenv: ^5.1.0
+  http: ^1.2.2
+  mobile_scanner: ^5.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.4.4
+  build_runner: ^2.4.9
+  bloc_test: ^9.1.1
+  flutter_lints: ^5.0.0
+  auto_mappr: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/.env
+    - assets/.env.example

@@ -1,0 +1,52 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner() {
+      return request.auth != null && request.auth.token.role == 'owner';
+    }
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.role == 'admin';
+    }
+
+    function isValidImageFile() {
+      return request.resource.contentType.matches('image/.*') &&
+             request.resource.size < 10 * 1024 * 1024; // Max 10MB
+    }
+
+    // Menu Images
+    // Path: menus/{restaurantId}/{fileName}
+    match /menus/{restaurantId}/{fileName} {
+      // TEMPORARY FOR TESTING: Allow all read/write operations
+      // TODO: Restore proper security rules in production
+      allow read, write: if true;
+    }
+
+    // Profile Images
+    // Path: profiles/{userId}/avatar.jpg
+    match /profiles/{userId}/{fileName} {
+      // Anyone can read profile images
+      allow read: if true;
+
+      // Users can upload their own profile image
+      allow create, update: if isAuthenticated() &&
+                               request.auth.uid == userId &&
+                               isValidImageFile();
+
+      // Users can delete their own profile image
+      allow delete: if isAuthenticated() &&
+                       (request.auth.uid == userId || isAdmin());
+    }
+
+    // Default: Deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

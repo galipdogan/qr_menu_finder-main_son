@@ -1,0 +1,101 @@
+{
+  "@@locale": "tr",
+  "appTitle": "QR Menu Finder",
+  "@appTitle": {
+    "description": "Uygulama adı"
+  },
+
+  "home": "Ana Sayfa",
+  "search": "Ara",
+  "favorites": "Favoriler",
+  "profile": "Profil",
+  "settings": "Ayarlar",
+
+  "login": "Giriş Yap",
+  "signup": "Kayıt Ol",
+  "logout": "Çıkış Yap",
+  "email": "E-posta",
+  "password": "Şifre",
+  "name": "Ad Soyad",
+
+  "restaurants": "Restoranlar",
+  "menus": "Menüler",
+  "items": "Ürünler",
+  "reviews": "Yorumlar",
+
+  "addReview": "Yorum Ekle",
+  "editReview": "Yorum Düzenle",
+  "deleteReview": "Yorum Sil",
+  "submitReview": "Yorum Gönder",
+
+  "notifications": "Bildirimler",
+  "language": "Dil",
+  "theme": "Tema",
+
+  "notificationsSettings": "Bildirim Ayarları",
+  "languageSettings": "Dil Ayarları",
+
+  "enableNotifications": "Bildirimleri Etkinleştir",
+  "allNotifications": "Tüm bildirimler",
+
+  "menuUpdates": "Menü Güncellemeleri",
+  "menuUpdatesDesc": "Favori restoranlardan yeni menü bildirimleri",
+
+  "priceChanges": "Fiyat Değişiklikleri",
+  "priceChangesDesc": "Takip ettiğiniz ürünlerde fiyat değişikliği",
+
+  "newComments": "Yeni Yorumlar",
+  "newCommentsDesc": "Favorilerimdeki restoranlara yeni yorum",
+
+  "turkish": "Türkçe",
+  "english": "English",
+
+  "cancel": "İptal",
+  "save": "Kaydet",
+  "delete": "Sil",
+  "edit": "Düzenle",
+  "submit": "Gönder",
+  "confirm": "Onayla",
+  "continueButton": "Devam Et",
+  "ok": "Tamam",
+  "back": "Geri",
+
+  "loading": "Yükleniyor...",
+  "error": "Hata",
+  "success": "Başarılı",
+
+  "noData": "Veri bulunamadı",
+  "noResults": "Sonuç bulunamadı",
+  "tryAgain": "Tekrar Dene",
+
+  "restaurantDetail": "Restoran Detayı",
+  "menuItems": "Menü Ürünleri",
+  "priceHistory": "Fiyat Geçmişi",
+
+  "myComments": "Yorumlarım",
+  "myHistory": "Geçmişim",
+  "myFavorites": "Favorilerim",
+
+  "ownerPanel": "İşletme Paneli",
+  "myRestaurants": "Restoranlarım",
+  "statistics": "İstatistikler",
+
+  "viewCount": "Görüntülenme",
+  "urlCouldNotBeLaunched": "URL açılamadı",
+  "loginRequired": "Giriş Gerekli",
+  "loginRequiredMessage": "Bu işlem için giriş yapmalısınız. Şimdi giriş yapmak ister misiniz?",
+  "addedToFavorites": "Favorilere eklendi",
+  "removedFromFavorites": "Favorilerden çıkarıldı",
+  "getDirections": "Yol Tarifi",
+  "menu": "Menü",
+  "menuNotFound": "Menü Bulunamadı",
+  "noMenuAddedYet": "Bu restoran için henüz menü eklenmemiş",
+  "loadingMoreRecentData": "Daha güncel veriler yükleniyor...",
+  "osmAttribution": "Bu restoran OpenStreetMap den alınmıştır.",
+  "googleRating": "Google Değerlendirmesi",
+  "couldNotFetchRecentData": "Güncel bilgi alınamadı",
+  "reviewCount": "Yorum Sayısı",
+
+  "clearHistory": "Geçmişi Temizle",
+  "clearHistoryConfirm": "Tüm geçmiş kayıtlarınız silinecek. Emin misiniz?"
+}

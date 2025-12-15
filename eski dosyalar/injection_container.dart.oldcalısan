@@ -1,0 +1,807 @@
+import 'package:get_it/get_it.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
+import 'package:qr_menu_finder/features/menu/data/cache/menu_cache_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Core
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+// Features - Analytics
+import 'features/analytics/data/datasources/analytics_remote_data_source.dart';
+import 'features/analytics/data/repositories/analytics_repository_impl.dart';
+import 'features/analytics/domain/repositories/analytics_repository.dart';
+import 'features/analytics/domain/usecases/initialize_analytics.dart';
+import 'features/analytics/domain/usecases/log_analytics_event.dart';
+
+// Features - Auth
+import 'features/auth/data/datasources/auth_local_data_source.dart';
+import 'features/auth/data/datasources/auth_remote_data_source.dart';
+import 'features/auth/data/repositories/auth_repository_impl.dart';
+import 'features/auth/domain/repositories/auth_repository.dart';
+import 'features/auth/domain/usecases/get_current_user.dart';
+import 'features/auth/domain/usecases/sign_in_with_email_password.dart';
+import 'features/auth/domain/usecases/sign_up_with_email_password.dart';
+import 'features/auth/domain/usecases/sign_out.dart';
+
+// Features - Restaurant
+import 'features/restaurant/data/datasources/restaurant_remote_data_source.dart';
+import 'features/restaurant/data/repositories/restaurant_repository_impl.dart';
+import 'features/restaurant/domain/repositories/restaurant_repository.dart';
+import 'features/restaurant/domain/usecases/get_nearby_restaurants.dart';
+import 'features/restaurant/domain/usecases/search_restaurants.dart';
+import 'features/restaurant/domain/usecases/get_restaurant_by_id.dart';
+import 'features/restaurant/domain/usecases/create_restaurant.dart';
+
+// Features - Menu
+import 'features/menu/data/datasources/menu_remote_data_source.dart';
+import 'features/menu/data/repositories/menu_repository_impl.dart';
+import 'features/menu/domain/repositories/menu_repository.dart';
+import 'features/menu/domain/usecases/get_menu_items_by_restaurant.dart';
+import 'features/menu/domain/usecases/get_menu_item_by_id.dart';
+import 'features/menu/domain/usecases/search_menu_items.dart';
+import 'features/menu/domain/usecases/get_popular_menu_items.dart';
+import 'features/menu/domain/usecases/get_menu_items_by_category.dart';
+import 'features/menu/domain/usecases/add_menu_photo.dart';
+import 'features/menu/domain/usecases/add_menu_url.dart';
+
+// Features - Review
+import 'features/review/data/datasources/review_remote_data_source.dart';
+import 'features/review/data/repositories/review_repository_impl.dart';
+import 'features/review/domain/repositories/review_repository.dart';
+import 'features/review/domain/usecases/get_user_reviews.dart';
+import 'features/review/domain/usecases/delete_review.dart';
+import 'features/review/domain/usecases/update_review.dart';
+
+// Features - Search
+import 'package:meilisearch/meilisearch.dart';
+import 'core/config/meilisearch_config.dart';
+import 'core/services/meilisearch_sync_service.dart';
+import 'features/search/data/datasources/search_remote_data_source.dart';
+import 'features/search/data/datasources/meilisearch_remote_data_source.dart';
+import 'features/search/data/repositories/hybrid_search_repository_impl.dart';
+import 'features/search/domain/repositories/search_repository.dart';
+import 'features/search/domain/usecases/search_items.dart';
+import 'features/search/domain/usecases/get_search_suggestions.dart';
+
+// Features - History
+import 'features/history/data/datasources/history_remote_data_source.dart';
+import 'features/history/data/repositories/history_repository_impl.dart';
+import 'features/history/domain/repositories/history_repository.dart';
+import 'features/history/domain/usecases/get_user_history.dart';
+import 'features/history/domain/usecases/clear_history.dart';
+import 'features/history/domain/usecases/delete_history_entry.dart';
+import 'features/history/domain/usecases/track_search.dart';
+
+// Features - Favorites
+import 'features/favorites/data/datasources/favorites_remote_data_source.dart';
+import 'features/favorites/data/repositories/favorites_repository_impl.dart';
+import 'features/favorites/domain/repositories/favorites_repository.dart';
+import 'features/favorites/domain/usecases/get_user_favorites.dart';
+import 'features/favorites/domain/usecases/add_favorite.dart';
+import 'features/favorites/domain/usecases/remove_favorite.dart';
+import 'features/favorites/domain/usecases/toggle_favorite.dart';
+
+// Features - Profile
+import 'features/profile/data/datasources/profile_remote_data_source.dart';
+import 'features/profile/data/repositories/profile_repository_impl.dart';
+import 'features/profile/domain/repositories/profile_repository.dart';
+import 'features/profile/domain/usecases/get_user_profile.dart' as profile_uc;
+import 'features/profile/domain/usecases/update_profile.dart';
+
+// Features - Owner Panel
+import 'features/owner_panel/data/datasources/owner_panel_remote_data_source.dart';
+import 'features/owner_panel/data/repositories/owner_panel_repository_impl.dart';
+import 'features/owner_panel/domain/repositories/owner_panel_repository.dart';
+import 'features/owner_panel/domain/usecases/get_owner_stats.dart';
+import 'features/owner_panel/domain/usecases/get_owner_restaurants.dart';
+import 'features/owner_panel/domain/usecases/request_owner_upgrade.dart';
+
+// Features - Home
+import 'features/home/data/datasources/location_remote_data_source.dart';
+import 'features/home/data/repositories/location_repository_impl.dart';
+import 'features/home/domain/repositories/location_repository.dart';
+import 'features/home/domain/usecases/get_current_location.dart';
+import 'features/home/domain/usecases/get_location_name.dart';
+import 'features/home/domain/usecases/search_places.dart';
+import 'features/home/domain/usecases/get_turkey_locations.dart';
+
+// Features - Item Moderation (replaces Cloud Functions)
+// TR: Item Moderasyon (Cloud Functions'ları değiştirir)
+import 'features/item_moderation/data/datasources/item_moderation_remote_data_source.dart';
+import 'features/item_moderation/data/repositories/item_moderation_repository_impl.dart';
+import 'features/item_moderation/domain/repositories/item_moderation_repository.dart';
+import 'features/item_moderation/domain/usecases/promote_to_live_usecase.dart';
+import 'features/item_moderation/domain/usecases/approve_item_usecase.dart';
+import 'features/item_moderation/domain/usecases/reject_item_usecase.dart';
+import 'features/item_moderation/domain/usecases/report_item_usecase.dart';
+import 'features/item_moderation/presentation/blocs/item_moderation_bloc.dart';
+
+// Features - Settings
+import 'features/settings/presentation/blocs/settings_bloc.dart';
+import 'core/theme/theme_bloc.dart';
+import 'features/settings/domain/usecases/get_language.dart';
+import 'features/settings/domain/usecases/set_language.dart';
+import 'features/settings/domain/usecases/get_notifications_status.dart';
+import 'features/settings/domain/usecases/set_notifications_status.dart';
+import 'features/settings/domain/usecases/get_theme_mode.dart';
+import 'features/settings/domain/usecases/set_theme_mode.dart';
+import 'features/settings/domain/repositories/settings_repository.dart';
+import 'features/settings/data/repositories/settings_repository_impl.dart';
+import 'features/settings/data/datasources/settings_local_data_source.dart';
+
+// Features - Notifications
+import 'features/notifications/presentation/blocs/notification_bloc.dart';
+import 'features/notifications/domain/usecases/request_notification_permission.dart';
+import 'features/notifications/domain/usecases/get_fcm_token.dart';
+import 'features/notifications/domain/usecases/get_notification_settings.dart';
+import 'features/notifications/domain/usecases/listen_to_foreground_messages.dart';
+import 'features/notifications/domain/usecases/listen_to_opened_app_messages.dart';
+import 'features/notifications/domain/usecases/listen_to_token_refresh.dart';
+import 'features/notifications/domain/usecases/save_fcm_token_for_user.dart';
+import 'features/notifications/domain/usecases/remove_fcm_token_for_user.dart';
+import 'features/notifications/domain/repositories/notification_repository.dart';
+import 'features/notifications/data/repositories/notification_repository_impl.dart';
+import 'features/notifications/data/datasources/notification_remote_data_source.dart';
+
+// Features - OCR
+import 'features/ocr/domain/usecases/recognize_text_from_image.dart';
+import 'features/ocr/domain/usecases/parse_text_to_menu_items.dart';
+import 'features/ocr/domain/usecases/extract_and_parse_menu_items_from_image.dart';
+import 'features/ocr/domain/repositories/ocr_repository.dart';
+import 'features/ocr/data/repositories/ocr_repository_impl.dart';
+import 'features/ocr/data/datasources/ocr_remote_data_source.dart';
+
+// Features - Storage
+import 'package:firebase_storage/firebase_storage.dart';
+import 'features/storage/domain/repositories/storage_repository.dart';
+import 'features/storage/data/repositories/storage_repository_impl.dart';
+import 'features/storage/data/datasources/storage_remote_data_source.dart';
+import 'features/storage/domain/usecases/upload_file.dart';
+import 'features/storage/domain/usecases/delete_file.dart';
+
+// Features - Price Comparison
+import 'features/price_comparison/data/datasources/price_comparison_remote_data_source.dart';
+import 'features/price_comparison/data/repositories/price_comparison_repository_impl.dart';
+import 'features/price_comparison/domain/repositories/price_comparison_repository.dart';
+import 'features/price_comparison/domain/usecases/get_compared_prices.dart';
+import 'features/price_comparison/presentation/blocs/price_comparison_bloc.dart';
+
+// Presentation - Blocs
+import 'features/auth/presentation/blocs/auth_bloc.dart';
+import 'features/restaurant/presentation/blocs/restaurant_bloc.dart';
+import 'features/menu/presentation/blocs/menu_bloc.dart';
+import 'features/menu/presentation/blocs/item_detail/item_detail_bloc.dart';
+import 'features/review/presentation/blocs/review_bloc.dart';
+import 'features/search/presentation/blocs/search_bloc.dart';
+import 'features/history/presentation/blocs/history_bloc.dart';
+import 'features/favorites/presentation/blocs/favorites_bloc.dart';
+import 'features/profile/presentation/blocs/profile_bloc.dart';
+import 'features/owner_panel/presentation/blocs/owner_panel_bloc.dart';
+import 'features/home/presentation/blocs/home_bloc.dart';
+import 'features/home/presentation/blocs/search/search_bloc.dart'
+    as home_search;
+import 'features/home/presentation/blocs/location_selection/location_selection_bloc.dart';
+
+// Legacy services (to be migrated)
+// Note: AuthService deleted - migrated to AuthBloc (Clean Architecture)
+// Note: CloudFunctionsService deleted - replaced with client-side logic (Week 1)
+// Note: GooglePlacesService deleted - replaced with NominatimService (Week 2)
+import 'features/maps/data/datasources/photon_remote_data_source.dart';
+import 'features/maps/data/datasources/turkey_location_remote_data_source.dart';
+import 'features/maps/data/datasources/nominatim_remote_data_source.dart';
+import 'features/maps/data/datasources/openstreetmap_details_remote_data_source.dart';
+
+final sl = GetIt.instance;
+
+/// Initialize all dependencies
+Future<void> init() async {
+  //! Features
+
+  // Auth Feature
+  _initAuth();
+
+  // Restaurant Feature
+  _initRestaurant();
+
+  // Menu Feature
+  _initMenu();
+
+  // Analytics Feature
+  _initAnalytics();
+
+  // Review Feature
+  _initReview();
+
+  // Search Feature
+  _initSearch();
+
+  // History Feature
+  _initHistory();
+
+  // Favorites Feature
+  _initFavorites();
+
+  // Profile Feature
+  _initProfile();
+
+  // Owner Panel Feature
+  _initOwnerPanel();
+
+  // Home Feature
+  _initHome();
+
+  // Item Moderation Feature (replaces Cloud Functions)
+  // TR: Item Moderasyon Feature (Cloud Functions'ları değiştirir)
+  _initItemModeration();
+
+  // Settings Feature
+  _initSettings();
+
+  // Notifications Feature
+  _initNotifications();
+
+  // OCR Feature
+  _initOcr();
+
+  // Storage Feature
+  _initStorage();
+
+  // Price Comparison Feature
+  _initPriceComparison();
+
+  //! Core
+  _initCore();
+
+  //! External
+  await _initExternal();
+}
+
+/// Initialize Analytics feature dependencies
+void _initAnalytics() {
+  // Use cases
+  sl.registerLazySingleton(() => InitializeAnalytics(sl()));
+  sl.registerLazySingleton(() => LogAnalyticsEvent(sl()));
+
+  // Repository
+  sl.registerLazySingleton<AnalyticsRepository>(
+    () => AnalyticsRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<AnalyticsRemoteDataSource>(
+    () => FirebaseAnalyticsDataSourceImpl(firebaseAnalytics: sl()),
+  );
+}
+
+/// Initialize Auth feature dependencies
+void _initAuth() {
+  // Bloc
+  sl.registerFactory(
+    () => AuthBloc(
+      getCurrentUser: sl(),
+      signInWithEmailPassword: sl(),
+      signUpWithEmailPassword: sl(),
+      signOut: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetCurrentUser(sl()));
+  sl.registerLazySingleton(() => SignInWithEmailPassword(sl()));
+  sl.registerLazySingleton(() => SignUpWithEmailPassword(sl()));
+  sl.registerLazySingleton(() => SignOut(sl()));
+
+  // Repository
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<AuthLocalDataSource>(
+    () => AuthLocalDataSourceImpl(sharedPreferences: sl()),
+  );
+  sl.registerLazySingleton<AuthRemoteDataSource>(
+    () => AuthRemoteDataSourceImpl(firebaseAuth: sl(), firestore: sl()),
+  );
+}
+
+/// Initialize Restaurant feature dependencies
+void _initRestaurant() {
+  // Bloc
+  sl.registerFactory(
+    () => RestaurantBloc(
+      getNearbyRestaurants: sl(),
+      searchRestaurants: sl(),
+      getRestaurantById: sl(),
+      createRestaurant: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetNearbyRestaurants(sl()));
+  sl.registerLazySingleton(() => SearchRestaurants(sl()));
+  sl.registerLazySingleton(() => GetRestaurantById(sl()));
+  sl.registerLazySingleton(() => CreateRestaurant(sl()));
+  // Menu Cache
+  sl.registerLazySingleton(() => MenuCacheService());
+
+  // Repository
+  sl.registerLazySingleton<RestaurantRepository>(
+    () => RestaurantRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<RestaurantRemoteDataSource>(
+    () => RestaurantRemoteDataSourceImpl(
+      firestore: sl(),
+      nominatimRemoteDataSource: sl(),
+      osmDetailsService: sl<OpenStreetMapDetailsRemoteDataSource>(),
+    ),
+  );
+}
+
+/// Initialize Menu feature dependencies
+void _initMenu() {
+  // Blocs
+  sl.registerFactory(
+    () => MenuBloc(
+      getMenuItemsByRestaurant: sl(),
+      searchMenuItems: sl(),
+      getPopularMenuItems: sl(),
+      getMenuItemsByCategory: sl(),
+      addMenuPhoto: sl(),
+      addMenuUrl: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => ItemDetailBloc(getMenuItemById: sl(), getRestaurantById: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetMenuItemsByRestaurant(sl()));
+  sl.registerLazySingleton(() => GetMenuItemById(sl()));
+  sl.registerLazySingleton(() => SearchMenuItems(sl()));
+  sl.registerLazySingleton(() => GetPopularMenuItems(sl()));
+  sl.registerLazySingleton(() => GetMenuItemsByCategory(sl()));
+  sl.registerLazySingleton(() => AddMenuPhoto(sl(), sl()));
+  sl.registerLazySingleton(() => AddMenuUrl(sl()));
+
+  // Repository
+  sl.registerLazySingleton<MenuRepository>(
+    () => MenuRepositoryImpl(remoteDataSource: sl()),
+  );
+}
+
+/// Initialize Review feature dependencies
+void _initReview() {
+  // Bloc
+  sl.registerFactory(
+    () => ReviewBloc(
+      getUserReviews: sl(),
+      deleteReview: sl(),
+      updateReview: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetUserReviews(sl()));
+  sl.registerLazySingleton(() => DeleteReview(sl()));
+  sl.registerLazySingleton(() => UpdateReview(sl()));
+
+  // Repository
+  sl.registerLazySingleton<ReviewRepository>(
+    () => ReviewRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<ReviewRemoteDataSource>(
+    () => ReviewRemoteDataSourceImpl(firestore: sl()),
+  );
+}
+
+/// Initialize Search feature dependencies
+void _initSearch() {
+  // Bloc
+  sl.registerFactory(
+    () => SearchBloc(searchItems: sl(), getSearchSuggestions: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => SearchItems(sl()));
+  sl.registerLazySingleton(() => GetSearchSuggestions(sl()));
+
+  // Repository - Use Hybrid Search (MeiliSearch + Firestore fallback)
+  sl.registerLazySingleton<SearchRepository>(
+    () => HybridSearchRepositoryImpl(
+      firestoreDataSource: sl(),
+      meilisearchDataSource: MeiliSearchConfig.isEnabled ? sl() : null,
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<SearchRemoteDataSource>(
+    () => SearchRemoteDataSourceImpl(firestore: sl()),
+  );
+
+  // MeiliSearch data source (optional, only if enabled)
+  if (MeiliSearchConfig.isEnabled) {
+    sl.registerLazySingleton<MeiliSearchRemoteDataSource>(
+      () => MeiliSearchRemoteDataSourceImpl(client: sl()),
+    );
+  }
+
+  // MeiliSearch sync service (optional, only if enabled)
+  if (MeiliSearchConfig.isEnabled) {
+    sl.registerLazySingleton(
+      () =>
+          MeiliSearchSyncService(firestore: sl(), meilisearchDataSource: sl()),
+    );
+  }
+}
+
+/// Initialize History feature dependencies
+void _initHistory() {
+  // Bloc
+  sl.registerFactory(
+    () => HistoryBloc(
+      getUserHistory: sl(),
+      clearHistory: sl(),
+      deleteHistoryEntry: sl(),
+      trackSearch: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetUserHistory(sl()));
+  sl.registerLazySingleton(() => ClearHistory(sl()));
+  sl.registerLazySingleton(() => DeleteHistoryEntry(sl()));
+  sl.registerLazySingleton(() => TrackSearch(sl()));
+
+  // Repository
+  sl.registerLazySingleton<HistoryRepository>(
+    () => HistoryRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<HistoryRemoteDataSource>(
+    () => HistoryRemoteDataSourceImpl(firestore: sl()),
+  );
+}
+
+/// Initialize Favorites feature dependencies
+void _initFavorites() {
+  // Bloc
+  sl.registerFactory(
+    () => FavoritesBloc(
+      getUserFavorites: sl(),
+      addFavorite: sl(),
+      removeFavorite: sl(),
+      toggleFavorite: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetUserFavorites(sl()));
+  sl.registerLazySingleton(() => AddFavorite(sl()));
+  sl.registerLazySingleton(() => RemoveFavorite(sl()));
+  sl.registerLazySingleton(() => ToggleFavorite(sl()));
+
+  // Repository
+  sl.registerLazySingleton<FavoritesRepository>(
+    () => FavoritesRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<FavoritesRemoteDataSource>(
+    () => FavoritesRemoteDataSourceImpl(firestore: sl()),
+  );
+}
+
+/// Initialize Profile feature dependencies
+void _initProfile() {
+  // Bloc
+  sl.registerFactory(
+    () => ProfileBloc(getUserProfile: sl(), updateProfile: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => profile_uc.GetUserProfile(sl()));
+  sl.registerLazySingleton(() => UpdateProfile(sl()));
+
+  // Repository
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(firestore: sl()),
+  );
+}
+
+/// Initialize Owner Panel feature dependencies
+void _initOwnerPanel() {
+  // Bloc
+  sl.registerFactory(
+    () => OwnerPanelBloc(
+      getOwnerStats: sl(),
+      getOwnerRestaurants: sl(),
+      requestOwnerUpgrade: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetOwnerStats(sl()));
+  sl.registerLazySingleton(() => GetOwnerRestaurants(sl()));
+  sl.registerLazySingleton(() => RequestOwnerUpgrade(sl()));
+
+  // Repository
+  sl.registerLazySingleton<OwnerPanelRepository>(
+    () => OwnerPanelRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<OwnerPanelRemoteDataSource>(
+    () => OwnerPanelRemoteDataSourceImpl(firestore: sl()),
+  );
+}
+
+/// Initialize Home feature dependencies
+void _initHome() {
+  // Bloc
+  sl.registerFactory(
+    () => HomeBloc(
+      getCurrentLocation: sl(),
+      getLocationName: sl(),
+      getNearbyRestaurants: sl(),
+      getUserFavorites: sl(),
+      toggleFavorite: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetCurrentLocation(sl()));
+  sl.registerLazySingleton(() => GetLocationName(sl()));
+  sl.registerLazySingleton(() => SearchPlaces(sl()));
+  sl.registerLazySingleton(() => GetTurkeyLocations(sl()));
+
+  // Home Search BLoC
+  sl.registerFactory(() => home_search.SearchBloc(searchPlaces: sl()));
+
+  // Location Selection BLoC
+  sl.registerFactory(() => LocationSelectionBloc(getTurkeyLocations: sl()));
+
+  // Repository
+  sl.registerLazySingleton<LocationRepository>(
+    () => LocationRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<LocationRemoteDataSource>(
+    () => LocationRemoteDataSourceImpl(
+      nominatimRemoteDataSource: sl(),
+      turkeyLocationRemoteDataSource: sl(),
+      photonRemoteDataSource: sl(),
+      restaurantRemoteDataSource: sl(),
+    ),
+  );
+}
+
+/// Initialize Item Moderation feature dependencies
+/// TR: Item Moderasyon feature bağımlılıklarını başlat
+///
+/// This feature replaces Cloud Functions:
+/// - promoteToLive
+/// - approveItem
+/// - rejectItem
+/// - reportItem
+///
+/// Bu feature Cloud Functions'ları değiştirir:
+/// - promoteToLive
+/// - approveItem
+/// - rejectItem
+/// - reportItem
+void _initItemModeration() {
+  // BLoC
+  sl.registerFactory(
+    () => ItemModerationBloc(
+      promoteToLiveUseCase: sl(),
+      approveItemUseCase: sl(),
+      rejectItemUseCase: sl(),
+      reportItemUseCase: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => PromoteToLiveUseCase(sl()));
+  sl.registerLazySingleton(() => ApproveItemUseCase(sl()));
+  sl.registerLazySingleton(() => RejectItemUseCase(sl()));
+  sl.registerLazySingleton(() => ReportItemUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<ItemModerationRepository>(
+    () => ItemModerationRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<ItemModerationRemoteDataSource>(
+    () => ItemModerationRemoteDataSourceImpl(firestore: sl(), auth: sl()),
+  );
+}
+
+/// Initialize Settings feature dependencies
+void _initSettings() {
+  // Bloc
+  sl.registerFactory(
+    () => SettingsBloc(
+      getLanguage: sl(),
+      setLanguage: sl(),
+      getNotificationsStatus: sl(),
+      setNotificationsStatus: sl(),
+      getThemeMode: sl(),
+      setThemeMode: sl(),
+    ),
+  );
+  sl.registerFactory(() => ThemeBloc(getThemeMode: sl(), setThemeMode: sl()));
+
+  // Use cases
+  sl.registerLazySingleton(() => GetLanguage(sl()));
+  sl.registerLazySingleton(() => SetLanguage(sl()));
+  sl.registerLazySingleton(() => GetNotificationsStatus(sl()));
+  sl.registerLazySingleton(() => SetNotificationsStatus(sl()));
+  sl.registerLazySingleton(() => GetThemeMode(sl()));
+  sl.registerLazySingleton(() => SetThemeMode(sl()));
+
+  // Repository
+  sl.registerLazySingleton<SettingsRepository>(
+    () => SettingsRepositoryImpl(localDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<SettingsLocalDataSource>(
+    () => SettingsLocalDataSourceImpl(sharedPreferences: sl()),
+  );
+}
+
+/// Initialize Notifications feature dependencies
+void _initNotifications() {
+  // Bloc
+  sl.registerFactory(
+    () => NotificationBloc(
+      requestNotificationPermission: sl(),
+      getFCMToken: sl(),
+      getNotificationSettings: sl(),
+      listenToForegroundMessages: sl(),
+      listenToOpenedAppMessages: sl(),
+      listenToTokenRefresh: sl(),
+      saveFCMTokenForUser: sl(),
+      removeFCMTokenForUser: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => RequestNotificationPermission(sl()));
+  sl.registerLazySingleton(() => GetFCMToken(sl()));
+  sl.registerLazySingleton(() => GetNotificationSettings(sl()));
+  sl.registerLazySingleton(() => ListenToForegroundMessages(sl()));
+  sl.registerLazySingleton(() => ListenToOpenedAppMessages(sl()));
+  sl.registerLazySingleton(() => ListenToTokenRefresh(sl()));
+  sl.registerLazySingleton(() => SaveFCMTokenForUser(sl()));
+  sl.registerLazySingleton(() => RemoveFCMTokenForUser(sl()));
+
+  // Repository
+  sl.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<NotificationRemoteDataSource>(
+    () => FirebaseNotificationDataSourceImpl(
+      firebaseMessaging: sl(),
+      firestore: sl(),
+    ),
+  );
+}
+
+/// Initialize OCR feature dependencies
+void _initOcr() {
+  // Use cases
+  sl.registerLazySingleton(() => RecognizeTextFromImage(sl()));
+  sl.registerLazySingleton(() => ParseTextToMenuItems(sl()));
+  sl.registerLazySingleton(() => ExtractAndParseMenuItemsFromImage(sl()));
+
+  // Repository
+  sl.registerLazySingleton<OcrRepository>(
+    () => OcrRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<OcrRemoteDataSource>(() => MLKitOcrDataSourceImpl());
+}
+
+/// Initialize Storage feature dependencies
+void _initStorage() {
+  // Use cases
+  sl.registerLazySingleton(() => UploadFile(sl()));
+  sl.registerLazySingleton(() => DeleteFile(sl()));
+
+  // Repository
+  sl.registerLazySingleton<StorageRepository>(
+    () => StorageRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<StorageRemoteDataSource>(
+    () => FirebaseStorageDataSourceImpl(firebaseStorage: sl<FirebaseStorage>()),
+  );
+}
+
+/// Initialize Price Comparison feature dependencies
+void _initPriceComparison() {
+  // Bloc
+  sl.registerFactory(() => PriceComparisonBloc(getComparedPrices: sl()));
+
+  // Use cases
+  sl.registerLazySingleton(() => GetComparedPrices(sl()));
+
+  // Repository
+  sl.registerLazySingleton<PriceComparisonRepository>(
+    () => PriceComparisonRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<PriceComparisonRemoteDataSource>(
+    () => PriceComparisonRemoteDataSourceImpl(firestore: sl()),
+  );
+}
+
+/// Initialize core dependencies
+void _initCore() {
+  // Utils, constants, etc. are static - no DI needed
+}
+
+/// Initialize external dependencies
+Future<void> _initExternal() async {
+  sl.registerLazySingleton(() => FirebaseAuth.instance);
+  sl.registerLazySingleton(() => FirebaseFirestore.instance);
+  sl.registerLazySingleton(() => FirebaseAnalytics.instance);
+  sl.registerLazySingleton(() => FirebaseMessaging.instance);
+  sl.registerLazySingleton(() => http.Client());
+  sl.registerLazySingleton(() => FirebaseStorage.instance);
+
+  // SharedPreferences
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
+
+  // MeiliSearch Client (optional, only if enabled)
+  if (MeiliSearchConfig.isEnabled) {
+    sl.registerLazySingleton(
+      () => MeiliSearchClient(MeiliSearchConfig.host, MeiliSearchConfig.apiKey),
+    );
+  }
+
+  // Nominatim Service (replaces Google Places API - FREE!)
+  // TR: Nominatim Servisi (Google Places API'yi değiştirir - ÜCRETSİZ!)
+  sl.registerLazySingleton<NominatimRemoteDataSource>(
+    () => NominatimRemoteDataSourceImpl(client: sl()),
+  );
+
+  // Photon Service (for autocomplete - FREE!)
+  sl.registerLazySingleton<PhotonRemoteDataSource>(
+    () => PhotonRemoteDataSourceImpl(client: sl()),
+  );
+
+  // OpenStreetMap Details Service (for restaurant details - FREE!)
+  // TR: OpenStreetMap Detay Servisi (restoran detayları için - ÜCRETSİZ!)
+  sl.registerLazySingleton<OpenStreetMapDetailsRemoteDataSource>(
+    () => OpenStreetMapDetailsRemoteDataSourceImpl(),
+  );
+
+  sl.registerLazySingleton<TurkeyLocationRemoteDataSource>(
+    () => TurkeyLocationRemoteDataSourceImpl(),
+  );
+}

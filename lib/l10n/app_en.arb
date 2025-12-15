@@ -1,0 +1,100 @@
+{
+  "@@locale": "en",
+  "appTitle": "QR Menu Finder",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "home": "Home",
+  "search": "Search",
+  "favorites": "Favorites",
+  "profile": "Profile",
+  "settings": "Settings",
+
+  "login": "Login",
+  "signup": "Sign Up",
+  "logout": "Log Out",
+  "email": "E-Mail",
+  "password": "Sassword",
+  "name": "Name Surname",
+
+  "restaurants": "Restaurants",
+  "menus": "Menus",
+  "items": "Items",
+  "reviews": "Reviews",
+
+  "addReview": "Add Review",
+  "editReview": "Edit Review",
+  "deleteReview": "Delete Review",
+  "submitReview": "Submit Review",
+
+  "notifications": "Notifications",
+  "language": "Language",
+  "theme": "Theme",
+
+  "notificationsSettings": "Notifications Settings",
+  "languageSettings": "Language Settings",
+
+  "enableNotifications": "Enable Notifications",
+  "allNotifications": "All Notifications",
+
+  "menuUpdates": "Menu Updates",
+  "menuUpdatesDesc": "New menu notifications from your favorite restaurants",
+
+  "priceChanges": "Price Changes",
+  "priceChangesDesc": "Price changes for products you follow",
+
+  "newComments": "New Comments",
+  "newCommentsDesc": "New reviews for my favorite restaurants",
+
+  "turkish": "Türkçe",
+  "english": "English",
+
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "submit": "Submit",
+  "confirm": "Confirm",
+  "continueButton": "Continue",
+  "ok": "OK",
+  "back": "Back",
+
+  "loading": "Loading...",
+  "error": "Error",
+  "success": "Success",
+
+  "noData": "No Data Found",
+  "noResults": "No Results Found",
+  "tryAgain": "TryAgain",
+
+  "restaurantDetail": "Restaurant Detail",
+  "menuItems": "Menu Items",
+  "priceHistory": "Price History",
+
+  "myComments": "My Comments",
+  "myHistory": "my History",
+  "myFavorites": "Favorites",
+
+  "ownerPanel": "Owner Panel",
+  "myRestaurants": "My Restaurants",
+  "statistics": "Statistics",
+
+  "viewCount": "View Count",
+  "urlCouldNotBeLaunched": "URL could not be launched",
+  "loginRequired": "Login Required",
+  "loginRequiredMessage": "You need to log in for this action. Do you want to log in now?",
+  "addedToFavorites": "Added to favorites",
+  "removedFromFavorites": "Removed from favorites",
+  "getDirections": "Get Directions",
+  "menu": "Menu",
+  "menuNotFound": "Menu Not Found",
+  "noMenuAddedYet": "No menu has been added for this restaurant yet",
+  "loadingMoreRecentData": "Loading more recent data...",
+  "osmAttribution": "This restaurant is sourced from OpenStreetMap.",
+  "googleRating": "Google Rating",
+  "couldNotFetchRecentData": "Could not fetch recent data",
+  "reviewCount": "Review Count",
+
+  "clearHistory": "Clear History",
+  "clearHistoryConfirm": "All History Will Clear. Confirm?"
+}
