@@ -12,11 +12,12 @@ import '../../../../core/mapper/mapper.dart'; // Mappr import
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
-  final Mappr mappr = Mappr(); // merkezi mapper
+  final Mappr mappr;
 
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
+    required this.mappr,
   });
 
   @override

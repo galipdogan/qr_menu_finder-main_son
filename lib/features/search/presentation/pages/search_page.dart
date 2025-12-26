@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../routing/app_navigation.dart';
 import '../../domain/entities/search_query.dart';
 import '../blocs/search_bloc.dart';
@@ -159,7 +160,7 @@ class _SearchPageState extends State<SearchPage> {
           autofocus: true,
           style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
           decoration: InputDecoration(
-            hintText: 'Yemek veya restoran ara...',
+            hintText: ErrorMessages.searchHint,
             hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)),
             border: InputBorder.none,
           ),
@@ -190,15 +191,15 @@ class _SearchPageState extends State<SearchPage> {
       body: BlocBuilder<SearchBloc, SearchState>(
         builder: (context, state) {
           if (state is SearchInitial) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.search,
-              title: 'Arama Yap',
-              subtitle: 'Yemek veya restoran aramak için yukarıdaki arama çubuğunu kullanın',
+              title: ErrorMessages.searchStartTitle,
+              subtitle: ErrorMessages.searchStartSubtitle,
             );
           }
 
           if (state is SearchLoading) {
-            return const LoadingIndicator(message: 'Aranıyor...');
+            return LoadingIndicator(message: ErrorMessages.searching);
           }
 
           if (state is SearchError && state.previousResponse == null) {
@@ -214,10 +215,10 @@ class _SearchPageState extends State<SearchPage> {
 
           if (state is SearchLoaded) {
             if (state.isEmpty) {
-              return const EmptyState(
+              return EmptyState(
                 icon: Icons.search_off,
-                title: 'Sonuç Bulunamadı',
-                subtitle: 'Aramanızla eşleşen sonuç bulunamadı. Lütfen farklı bir arama yapın.',
+                title: ErrorMessages.searchNoResultsTitle,
+                subtitle: ErrorMessages.searchNoResultsSubtitle,
               );
             }
 
@@ -274,10 +275,10 @@ class _SearchPageState extends State<SearchPage> {
             );
           }
 
-          return const EmptyState(
+          return EmptyState(
             icon: Icons.info,
-            title: 'Bir şeyler yanlış gitti',
-            subtitle: 'Lütfen tekrar deneyin',
+            title: ErrorMessages.somethingWentWrong,
+            subtitle: ErrorMessages.retryPrompt,
           );
         },
       ),

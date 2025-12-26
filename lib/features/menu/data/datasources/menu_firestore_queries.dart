@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/constants/app_constants.dart';
 
 class MenuFirestoreQueries {
   final FirebaseFirestore firestore;
@@ -6,7 +7,7 @@ class MenuFirestoreQueries {
   MenuFirestoreQueries(this.firestore);
 
   Query baseItemsQuery() {
-    return firestore.collection('items').where('status', isEqualTo: 'approved');
+    return firestore.collection(AppConstants.itemsCollection).where('status', isEqualTo: 'approved');
   }
 
   Query itemsByRestaurant(String restaurantId, int limit) {

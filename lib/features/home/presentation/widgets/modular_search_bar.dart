@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/error/error_messages.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/place_suggestion.dart';
 import '../blocs/search/search_bloc.dart';
@@ -24,7 +25,7 @@ class ModularSearchBar extends StatefulWidget {
     this.onSuggestionSelected,
     this.latitude,
     this.longitude,
-    this.hintText = 'Restoran, yemek veya konum ara...',
+    this.hintText = ErrorMessages.searchHint,
   });
 
   @override
@@ -238,7 +239,7 @@ class _ModularSearchBarState extends State<ModularSearchBar> {
           valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
         ),
       ),
-      title: const Text('Aranıyor...'),
+      title: const Text(ErrorMessages.searching),
       dense: true,
     );
   }
@@ -251,7 +252,7 @@ class _ModularSearchBarState extends State<ModularSearchBar> {
         size: 20,
       ),
       title: Text(
-        'Arama hatası: $message',
+        '${ErrorMessages.errorPrefix} $message',
         style: TextStyle(color: AppColors.error),
       ),
       dense: true,
@@ -266,7 +267,7 @@ class _ModularSearchBarState extends State<ModularSearchBar> {
         size: 20,
       ),
       title: Text(
-        'Sonuç bulunamadı',
+        ErrorMessages.searchNoResultsTitle,
         style: TextStyle(color: AppColors.textMuted),
       ),
       dense: true,

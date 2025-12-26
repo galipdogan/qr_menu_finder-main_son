@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/error/error.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../models/menu_item_model.dart';
 import '../cache/menu_cache_service.dart';
 import 'menu_firestore_queries.dart';
@@ -20,7 +21,7 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
     int limit = 50,
   }) async {
     final key = '${restaurantId}_${category ?? 'all'}_$limit';
-    final cached = cache.get(key);
+    final cached = await cache.get(key);
     if (cached != null) return cached;
 
     Query q = queries.itemsByRestaurant(restaurantId, limit);
@@ -31,11 +32,10 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
       snapshot = await q.get(const GetOptions(source: Source.server));
     }
 
-    final items = snapshot.docs
-        .map((doc) => MenuItemModel.fromFirestore(doc))
-        .toList();
+    final items =
+        snapshot.docs.map((doc) => MenuItemModel.fromFirestore(doc)).toList();
 
-    cache.set(key, items);
+    await cache.set(key, items);
     return items;
   }
 
@@ -43,13 +43,13 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   Future<MenuItemModel> getMenuItemById(String id) async {
     try {
       var doc = await firestore
-          .collection('items')
+          .collection(AppConstants.itemsCollection)
           .doc(id)
           .get(const GetOptions(source: Source.cache));
 
       if (!doc.exists) {
         doc = await firestore
-            .collection('items')
+            .collection(AppConstants.itemsCollection)
             .doc(id)
             .get(const GetOptions(source: Source.server));
       }
@@ -73,7 +73,7 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   }) async {
     try {
       Query q = firestore
-          .collection('items')
+          .collection(AppConstants.itemsCollection)
           .where('searchableText', isGreaterThanOrEqualTo: query.toLowerCase())
           .where(
             'searchableText',
@@ -126,7 +126,7 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
     try {
       // ✅ 1) Duplicate kontrolü
       final existing = await firestore
-          .collection('items')
+          .collection(AppConstants.itemsCollection)
           .where('restaurantId', isEqualTo: restaurantId)
           .where('type', isEqualTo: 'link')
           .where('url', isEqualTo: url)
@@ -139,7 +139,7 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
       }
 
       // ✅ 2) Yeni link item oluştur
-      await firestore.collection('items').add({
+      await firestore.collection(AppConstants.itemsCollection).add({
         'restaurantId': restaurantId,
         'type': 'link',
         'url': url,
@@ -161,7 +161,7 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   @override
   Future<void> deleteMenuItem(String id) async {
     try {
-      await firestore.collection('items').doc(id).delete();
+      await firestore.collection(AppConstants.itemsCollection).doc(id).delete();
     } catch (e) {
       throw ServerException('Failed to delete menu item: $e');
     }
@@ -171,7 +171,7 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   Future<List<MenuItemModel>> getPopularMenuItems({int limit = 10}) async {
     try {
       final snapshot = await firestore
-          .collection('items')
+          .collection(AppConstants.itemsCollection)
           .where('status', isEqualTo: 'approved')
           .orderBy('reviewCount', descending: true)
           .orderBy('rating', descending: true)
@@ -222,7 +222,7 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   @override
   Future<MenuItemModel> createMenuItem(MenuItemModel menuItem) async {
     try {
-      final docRef = firestore.collection('items').doc();
+      final docRef = firestore.collection(AppConstants.itemsCollection).doc();
       final itemWithId = menuItem.copyWith(id: docRef.id);
 
       await docRef.set(itemWithId.toFirestore());
@@ -237,7 +237,7 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   Future<MenuItemModel> updateMenuItem(MenuItemModel menuItem) async {
     try {
       await firestore
-          .collection('items')
+          .collection(AppConstants.itemsCollection)
           .doc(menuItem.id)
           .update(menuItem.toFirestore());
 
@@ -253,7 +253,7 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
     required double price,
     required String? currency,
   }) async {
-    await firestore.collection('items').add({
+    await firestore.collection(AppConstants.itemsCollection).add({
       'restaurantId': restaurantId,
       'type': 'ocr_item',
       'price': price,
@@ -268,7 +268,7 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
 
   @override
   Future<void> markLinkAsProcessed(String linkItemId) async {
-    await firestore.collection('items').doc(linkItemId).update({
+    await firestore.collection(AppConstants.itemsCollection).doc(linkItemId).update({
       'status': 'processed',
       'updatedAt': FieldValue.serverTimestamp(),
     });

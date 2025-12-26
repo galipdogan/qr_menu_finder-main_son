@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../domain/entities/menu_item.dart';
@@ -29,15 +30,15 @@ class ItemDetailPage extends StatelessWidget {
         body: BlocBuilder<ItemDetailBloc, ItemDetailState>(
           builder: (context, state) {
             if (state is ItemDetailLoading) {
-              return const LoadingIndicator(message: 'Ürün yükleniyor...');
+              return const LoadingIndicator(message: ErrorMessages.itemLoading);
             }
             if (state is ItemDetailError) {
-              return Center(child: Text('Hata: ${state.message}'));
+              return Center(child: Text('${ErrorMessages.errorPrefix} ${state.message}'));
             }
             if (state is ItemDetailLoaded) {
               return _buildLoadedBody(context, state.item);
             }
-            return const Center(child: Text('Ürün detayları yüklenemedi.'));
+            return const Center(child: Text(ErrorMessages.itemDetailLoadFailed));
           },
         ),
       ),

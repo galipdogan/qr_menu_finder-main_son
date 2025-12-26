@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/qr_scan_result.dart';
 
@@ -72,11 +73,11 @@ class _QRScannerPageState extends State<QRScannerPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Menü Ekle'),
+        title: const Text(ErrorMessages.qrAddMenuTitle),
         content: Text(
           isUrl
-              ? 'Bu URL\'den menü eklemek ister misiniz?'
-              : 'Bu içerikten menü eklemek ister misiniz?',
+              ? ErrorMessages.qrAddMenuUrlPrompt
+              : ErrorMessages.qrAddMenuContentPrompt,
         ),
         actions: [
           TextButton(
@@ -84,14 +85,14 @@ class _QRScannerPageState extends State<QRScannerPage> {
               Navigator.of(context).pop(); // Close dialog
               setState(() => hasScanned = false); // Reset scanner
             },
-            child: const Text('İptal'),
+            child: const Text(ErrorMessages.cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Close dialog
               setState(() => hasScanned = false); // Reset scanner
             },
-            child: const Text('Tekrar Tara'),
+            child: const Text(ErrorMessages.rescan),
           ),
           ElevatedButton(
             onPressed: () {
@@ -105,7 +106,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
             ),
-            child: const Text('Menü Ekle'),
+            child: const Text(ErrorMessages.qrAddMenuTitle),
           ),
         ],
       ),
@@ -134,14 +135,14 @@ class _QRScannerPageState extends State<QRScannerPage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Kamera hatası: ${error.errorDetails?.message ?? "Bilinmeyen hata"}',
+                      '${ErrorMessages.qrCameraErrorPrefix} ${error.errorDetails?.message ?? ErrorMessages.unknownError}',
                       style: const TextStyle(color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Kapat'),
+                      child: const Text(ErrorMessages.close),
                     ),
                   ],
                 ),
@@ -203,7 +204,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'QR kodu kare içine alın',
+                    ErrorMessages.qrInstructionTitle,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -213,7 +214,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Restoran menüsü veya QR menü kodunu tarayın',
+                    ErrorMessages.qrInstructionSubtitle,
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 14,

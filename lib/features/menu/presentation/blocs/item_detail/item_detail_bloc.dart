@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../../../../core/error/error_messages.dart';
 import '../../../domain/entities/menu_item.dart';
 import '../../../domain/usecases/get_menu_item_by_id.dart';
 import '../../../../restaurant/domain/entities/restaurant.dart';
@@ -56,7 +57,7 @@ class ItemDetailBloc extends Bloc<ItemDetailEvent, ItemDetailState> {
         },
       );
     } catch (e) {
-      emit(ItemDetailError('Ürün yüklenirken hata oluştu: ${e.toString()}'));
+      emit(ItemDetailError('${ErrorMessages.itemLoadFailedPrefix} ${e.toString()}'));
     }
   }
 }

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/user_profile.dart';
+import '../../../auth/domain/entities/user.dart';
 import '../../domain/usecases/get_user_profile.dart';
 import '../../domain/usecases/update_profile.dart';
 
@@ -22,7 +22,7 @@ class ProfileLoadRequested extends ProfileEvent {
 }
 
 class ProfileUpdateRequested extends ProfileEvent {
-  final UserProfile profile;
+  final User profile;
 
   const ProfileUpdateRequested({required this.profile});
 
@@ -52,7 +52,7 @@ class ProfileInitial extends ProfileState {}
 class ProfileLoading extends ProfileState {}
 
 class ProfileLoaded extends ProfileState {
-  final UserProfile profile;
+  final User profile;
 
   const ProfileLoaded({required this.profile});
 
@@ -61,7 +61,7 @@ class ProfileLoaded extends ProfileState {
 }
 
 class ProfileUpdating extends ProfileState {
-  final UserProfile currentProfile;
+  final User currentProfile;
 
   const ProfileUpdating({required this.currentProfile});
 
@@ -70,7 +70,7 @@ class ProfileUpdating extends ProfileState {
 }
 
 class ProfileUpdated extends ProfileState {
-  final UserProfile profile;
+  final User profile;
 
   const ProfileUpdated({required this.profile});
 
@@ -142,7 +142,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       (_) {
         emit(ProfileUpdated(profile: event.profile));
         // Reload profile after update
-        add(ProfileLoadRequested(uid: event.profile.uid));
+        add(ProfileLoadRequested(uid: event.profile.id));
       },
     );
   }

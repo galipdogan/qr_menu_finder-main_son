@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'features/auth/presentation/blocs/auth_event.dart';
 import 'features/auth/presentation/blocs/auth_state.dart';
+import 'features/notifications/presentation/blocs/notification_bloc.dart';
 import 'firebase_options.dart';
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
@@ -92,14 +93,15 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(create: (context) => di.sl<FavoritesBloc>()),
         BlocProvider(create: (context) => di.sl<HomeBloc>()),
-        // NotificationBloc temporarily disabled due to web compatibility issues
-        // BlocProvider(
-        //   create: (context) {
-        //     final bloc = di.sl<NotificationBloc>();
-        //     bloc.add(const InitializeNotifications());
-        //     return bloc;
-        //   },
-        // ),
+        // NotificationBloc - only enabled on mobile platforms (iOS/Android)
+        if (!kIsWeb)
+          BlocProvider(
+            create: (context) {
+              final bloc = di.sl<NotificationBloc>();
+              bloc.add(const InitializeNotifications());
+              return bloc;
+            },
+          ),
       ],
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, authState) {
@@ -111,17 +113,21 @@ class MyApp extends StatelessWidget {
                 type: FavoriteType.restaurant,
               ),
             );
-            // Save FCM token on login - disabled for web compatibility
-            // context.read<NotificationBloc>().add(
-            //   SaveFCMTokenRequested(userId: authState.user.id),
-            // );
+            // Save FCM token on login - only on mobile platforms
+            if (!kIsWeb) {
+              context.read<NotificationBloc>().add(
+                SaveFCMTokenRequested(userId: authState.user.id),
+              );
+            }
           } else if (authState is AuthUnauthenticated) {
             // Clear favorites when user logs out
             // No need to explicitly clear, bloc will reset to initial state
-            // Remove FCM token on logout - disabled for web compatibility
-            // context.read<NotificationBloc>().add(
-            //   RemoveFCMTokenRequested(userId: 'guest'),
-            // );
+            // Remove FCM token on logout - only on mobile platforms
+            if (!kIsWeb) {
+              context.read<NotificationBloc>().add(
+                const RemoveFCMTokenRequested(userId: 'guest'),
+              );
+            }
           }
         },
         child: BlocBuilder<ThemeBloc, ThemeState>(

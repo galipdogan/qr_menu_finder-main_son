@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/error/error_messages.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -137,7 +138,7 @@ class SearchResultCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        isRestaurant ? 'Restoran' : 'Menü',
+        isRestaurant ? ErrorMessages.restaurantLabel : ErrorMessages.menuLabel,
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,

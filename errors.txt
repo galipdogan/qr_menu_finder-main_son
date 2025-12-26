@@ -1,0 +1,42 @@
+﻿Launching lib\main.dart on sdk gphone64 x86 64 in debug mode...
+lib/features/profile/presentation/pages/profile_page.dart:202:49: Error: Member not found: 'userReviews'.
+                        context.push(RouteNames.userReviews);
+                                                ^^^^^^^^^^^
+lib/features/home/data/datasources/location_remote_data_source.dart:118:25: Error: The argument type 'List<NominatimPlace>' can't be assigned to the parameter type 'Iterable<PlaceResult>'.
+ - 'List' is from 'dart:core'.
+ - 'NominatimPlace' is from 'package:qr_menu_finder/core/models/nominatim_place.dart' ('lib/core/models/nominatim_place.dart').
+ - 'Iterable' is from 'dart:core'.
+ - 'PlaceResult' is from 'package:qr_menu_finder/core/models/place_result.dart' ('lib/core/models/place_result.dart').
+      allResults.addAll(nominatimResults);
+                        ^
+lib/features/home/data/repositories/location_repository_impl.dart:52:30: Error: The method 'getTurkeyLocations' isn't defined for the type 'LocationRemoteDataSource'.
+ - 'LocationRemoteDataSource' is from 'package:qr_menu_finder/features/home/data/datasources/location_remote_data_source.dart' ('lib/features/home/data/datasources/location_remote_data_source.dart').     
+Try correcting the name to the name of an existing method, or defining a method named 'getTurkeyLocations'.
+      () => remoteDataSource.getTurkeyLocations(),
+                             ^^^^^^^^^^^^^^^^^^
+lib/features/restaurant/data/datasources/restaurant_remote_data_source.dart:222:62: Error: The argument type 'NominatimPlace' can't be assigned to the parameter type 'PlaceResult'.
+ - 'NominatimPlace' is from 'package:qr_menu_finder/core/models/nominatim_place.dart' ('lib/core/models/nominatim_place.dart').
+ - 'PlaceResult' is from 'package:qr_menu_finder/core/models/place_result.dart' ('lib/core/models/place_result.dart').
+        .map((place) => _convertPlaceResultToRestaurantModel(place))
+                                                             ^
+lib/features/restaurant/data/datasources/restaurant_remote_data_source.dart:469:50: Error: The argument type 'String?' can't be assigned to the parameter type 'String'.
+            categories: _parseCuisineTypes(place.type),
+                                                 ^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command 'C:\Users\Galip\develop\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 12s
+Running Gradle task 'assembleDebug'...                             13,0s
+Error: Gradle task assembleDebug failed with exit code 1

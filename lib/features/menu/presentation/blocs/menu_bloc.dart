@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'dart:io';
+import '../../../../core/error/error_messages.dart';
 import '../../domain/entities/menu_item.dart';
 import '../../domain/usecases/get_menu_items_by_restaurant.dart';
 import '../../domain/usecases/process_menu_link.dart';
@@ -175,7 +176,7 @@ class MenuBloc extends Bloc<MenuEvent, MenuState> {
       if (_lastRestaurantId != null) {
         add(MenuItemsByRestaurantRequested(restaurantId: _lastRestaurantId!));
       } else {
-        emit(MenuError(message: "Restaurant ID bulunamadı"));
+        emit(MenuError(message: ErrorMessages.restaurantIdNotFound));
       }
     } catch (e) {
       emit(MenuError(message: e.toString()));

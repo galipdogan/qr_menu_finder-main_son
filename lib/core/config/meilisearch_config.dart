@@ -24,6 +24,10 @@ class MeiliSearchConfig {
     return Duration(seconds: seconds);
   }
 
+  /// Index names
+  static const String restaurantsIndexName = 'restaurants';
+  static const String menuItemsIndexName = 'menu_items';
+
   /// Index settings for restaurants
   static Map<String, dynamic> get restaurantsIndexSettings => {
     'searchableAttributes': [

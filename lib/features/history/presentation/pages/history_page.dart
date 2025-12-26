@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../domain/entities/history_entry.dart';
 import '../blocs/history_bloc.dart';
 import '../../../../routing/app_navigation.dart';
@@ -17,12 +18,12 @@ class HistoryPage extends StatelessWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Geçmişi Temizle'),
-        content: const Text('Tüm geçmiş kayıtlarınız silinecek. Emin misiniz?'),
+        title: const Text(ErrorMessages.confirmClearHistoryTitle),
+        content: const Text(ErrorMessages.confirmClearHistoryContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('İptal'),
+            child: const Text(ErrorMessages.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -30,7 +31,7 @@ class HistoryPage extends StatelessWidget {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Temizle'),
+            child: const Text(ErrorMessages.clear),
           ),
         ],
       ),
@@ -49,14 +50,14 @@ class HistoryPage extends StatelessWidget {
     if (userId == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Geçmiş'),
+          title: const Text(ErrorMessages.historyTitle),
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
         ),
         body: const EmptyState(
           icon: Icons.error_outline,
-          title: 'Giriş Yapmalısınız',
-          subtitle: 'Geçmişinizi görmek için lütfen giriş yapın.',
+          title: ErrorMessages.mustLogin,
+          subtitle: ErrorMessages.mustLoginForHistory,
         ),
       );
     }
@@ -65,11 +66,11 @@ class HistoryPage extends StatelessWidget {
       listener: (context, state) {
         if (state is HistoryCleared) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Geçmiş temizlendi'),
-              backgroundColor: AppColors.success,
-            ),
-          );
+              const SnackBar(
+                content: Text(ErrorMessages.historyCleared),
+                backgroundColor: AppColors.success,
+              ),
+            );
           // Reload history after clearing
           context.read<HistoryBloc>().add(HistoryLoadRequested(userId: userId));
         } else if (state is HistoryError) {
@@ -89,14 +90,14 @@ class HistoryPage extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Geçmiş'),
+            title: const Text(ErrorMessages.historyTitle),
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             actions: [
               if (state is HistoryLoaded && state.entries.isNotEmpty)
                 IconButton(
                   icon: const Icon(Icons.delete_sweep),
-                  tooltip: 'Geçmişi Temizle',
+                  tooltip: ErrorMessages.confirmClearHistoryTitle,
                   onPressed: () => _clearHistory(context, userId),
                 ),
             ],
@@ -111,8 +112,8 @@ class HistoryPage extends StatelessWidget {
     if (state is HistoryLoading || state is HistoryClearing) {
       return LoadingIndicator(
         message: state is HistoryClearing
-            ? 'Geçmiş temizleniyor...'
-            : 'Geçmiş yükleniyor...',
+            ? ErrorMessages.historyClearing
+            : ErrorMessages.historyLoading,
       );
     }
 
@@ -120,12 +121,11 @@ class HistoryPage extends StatelessWidget {
       if (state.entries.isEmpty) {
         return EmptyState(
           icon: Icons.history,
-          title: 'Henüz Geçmiş Yok',
-          subtitle:
-              'Ziyaret ettiğiniz restoranlar ve görüntülediğiniz menüler burada görünecek.',
+          title: ErrorMessages.historyEmptyTitle,
+          subtitle: ErrorMessages.historyEmptySubtitle,
           action: ElevatedButton(
             onPressed: () => AppNavigation.goHome(context),
-            child: const Text('Geri Dön'),
+            child: const Text(ErrorMessages.goBack),
           ),
         );
       }
@@ -152,12 +152,11 @@ class HistoryPage extends StatelessWidget {
     // Default/Error state
     return EmptyState(
       icon: Icons.history,
-      title: 'Henüz Geçmiş Yok',
-      subtitle:
-          'Ziyaret ettiğiniz restoranlar ve görüntülediğiniz menüler burada görünecek.',
+      title: ErrorMessages.historyEmptyTitle,
+      subtitle: ErrorMessages.historyEmptySubtitle,
       action: ElevatedButton(
         onPressed: () => AppNavigation.goHome(context),
-        child: const Text('Geri Dön'),
+        child: const Text(ErrorMessages.goBack),
       ),
     );
   }
@@ -171,7 +170,7 @@ class HistoryPage extends StatelessWidget {
     switch (item.type) {
       case HistoryType.restaurantView:
         icon = Icons.restaurant;
-        title = item.restaurantName ?? 'Restoran';
+        title = item.restaurantName ?? ErrorMessages.restaurantLabel;
         subtitle = 'Restoran görüntülendi';
         iconColor = AppColors.primary;
         break;
@@ -185,7 +184,7 @@ class HistoryPage extends StatelessWidget {
         break;
       case HistoryType.menuView:
         icon = Icons.menu_book;
-        title = item.restaurantName ?? 'Menü';
+        title = item.restaurantName ?? ErrorMessages.menuLabel;
         subtitle = 'Menü görüntülendi';
         iconColor = Colors.green;
         break;

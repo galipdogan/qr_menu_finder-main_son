@@ -1,18 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/error/error.dart';
-import '../../domain/entities/user_profile.dart';
-import '../models/user_profile_model.dart';
+import '../../../auth/domain/entities/user.dart';
+import '../../../auth/data/models/user_model.dart';
 
 /// Abstract profile remote data source
 abstract class ProfileRemoteDataSource {
   /// Get user profile by ID
-  Future<UserProfileModel> getUserProfile(String uid);
+  Future<UserModel> getUserProfile(String uid);
 
   /// Update user profile
-  Future<void> updateProfile(UserProfileModel profile);
+  Future<void> updateProfile(UserModel profile);
 
   /// Stream user profile changes
-  Stream<UserProfileModel> streamUserProfile(String uid);
+  Stream<UserModel> streamUserProfile(String uid);
 
   /// Update user role
   Future<void> updateUserRole({
@@ -29,7 +29,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   ProfileRemoteDataSourceImpl({required this.firestore});
 
   @override
-  Future<UserProfileModel> getUserProfile(String uid) async {
+  Future<UserModel> getUserProfile(String uid) async {
     try {
       // 🔥 OPTIMIZATION: Try cache first, then server
       var doc = await firestore.collection(_collection).doc(uid).get(
@@ -50,7 +50,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         );
       }
 
-      return UserProfileModel.fromFirestore(doc);
+      return UserModel.fromFirestore(doc);
     } catch (e, stackTrace) {
       if (e is ServerException) rethrow;
       throw ServerException(
@@ -61,10 +61,10 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<void> updateProfile(UserProfileModel profile) async {
+  Future<void> updateProfile(UserModel profile) async {
     try {
-      await firestore.collection(_collection).doc(profile.uid).set(
-            profile.toFirestore(isUpdate: true),
+      await firestore.collection(_collection).doc(profile.id).set(
+            profile.toFirestore(),
             SetOptions(merge: true),
           );
     } catch (e, stackTrace) {
@@ -76,7 +76,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Stream<UserProfileModel> streamUserProfile(String uid) {
+  Stream<UserModel> streamUserProfile(String uid) {
     try {
       return firestore
           .collection(_collection)
@@ -89,7 +89,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
             code: 'profile-not-found',
           );
         }
-        return UserProfileModel.fromFirestore(doc);
+        return UserModel.fromFirestore(doc);
       });
     } catch (e, stackTrace) {
       throw ServerException(
@@ -107,7 +107,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       await firestore.collection(_collection).doc(uid).update({
         'role': role.name,
-        'updatedAt': FieldValue.serverTimestamp(),
+        'lastLoginAt': FieldValue.serverTimestamp(),
       });
     } catch (e, stackTrace) {
       throw ServerException(

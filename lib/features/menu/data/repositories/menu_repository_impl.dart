@@ -1,6 +1,8 @@
 import 'package:dartz/dartz.dart';
+import 'package:qr_menu_finder/features/menu/data/models/menu_item_model.dart';
 import '../../../../core/error/error.dart';
 import '../../../../core/utils/repository_helper.dart';
+import '../../../../core/mapper/mapper.dart';
 import '../../../ocr/data/datasources/ocr_remote_data_source.dart';
 import '../../domain/entities/menu_item.dart';
 import '../../domain/repositories/menu_repository.dart';
@@ -10,10 +12,12 @@ import '../datasources/menu_remote_data_source.dart';
 class MenuRepositoryImpl implements MenuRepository {
   final MenuRemoteDataSource remoteDataSource;
   final OcrRemoteDataSource ocrRemoteDataSource;
+  final Mappr mappr;
 
   MenuRepositoryImpl({
     required this.remoteDataSource,
     required this.ocrRemoteDataSource,
+    required this.mappr,
   });
 
   @override
@@ -28,7 +32,7 @@ class MenuRepositoryImpl implements MenuRepository {
         category: category,
         limit: limit,
       ),
-      (model) => model.toEntity(),
+      (model) => mappr.convert<MenuItemModel, MenuItem>(model),
     );
   }
 
@@ -36,7 +40,7 @@ class MenuRepositoryImpl implements MenuRepository {
   Future<Either<Failure, MenuItem>> getMenuItemById(String id) async {
     return RepositoryHelper.execute(
       () => remoteDataSource.getMenuItemById(id),
-      (model) => model.toEntity(),
+      (model) => mappr.convert<MenuItemModel, MenuItem>(model),
     );
   }
 
@@ -54,19 +58,16 @@ class MenuRepositoryImpl implements MenuRepository {
         category: category,
         limit: limit,
       ),
-      (model) => model.toEntity(),
+      (model) => mappr.convert<MenuItemModel, MenuItem>(model),
     );
   }
 
   @override
   Future<Either<Failure, MenuItem>> createMenuItem(MenuItem menuItem) async {
     try {
-      // Convert entity to model for data layer
-      // Note: This would need additional data like menuId, searchableText
-      // In a real implementation, this would be handled by a mapper
-      throw UnimplementedError(
-        'Create menu item needs additional implementation',
-      );
+      final model = mappr.convert<MenuItem, MenuItemModel>(menuItem);
+      final result = await remoteDataSource.createMenuItem(model);
+      return Right(mappr.convert<MenuItemModel, MenuItem>(result));
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
     } catch (e) {
@@ -77,12 +78,9 @@ class MenuRepositoryImpl implements MenuRepository {
   @override
   Future<Either<Failure, MenuItem>> updateMenuItem(MenuItem menuItem) async {
     try {
-      // Convert entity to model for data layer
-      // Note: This would need additional data like menuId, searchableText
-      // In a real implementation, this would be handled by a mapper
-      throw UnimplementedError(
-        'Update menu item needs additional implementation',
-      );
+      final model = mappr.convert<MenuItem, MenuItemModel>(menuItem);
+      final result = await remoteDataSource.updateMenuItem(model);
+      return Right(mappr.convert<MenuItemModel, MenuItem>(result));
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
     } catch (e) {
@@ -103,7 +101,7 @@ class MenuRepositoryImpl implements MenuRepository {
   }) async {
     return RepositoryHelper.executeList(
       () => remoteDataSource.getPopularMenuItems(limit: limit),
-      (model) => model.toEntity(),
+      (model) => mappr.convert<MenuItemModel, MenuItem>(model),
     );
   }
 
@@ -117,7 +115,7 @@ class MenuRepositoryImpl implements MenuRepository {
         category: category,
         limit: limit,
       ),
-      (model) => model.toEntity(),
+      (model) => mappr.convert<MenuItemModel, MenuItem>(model),
     );
   }
 
@@ -131,7 +129,7 @@ class MenuRepositoryImpl implements MenuRepository {
         contributorId: contributorId,
         limit: limit,
       ),
-      (model) => model.toEntity(),
+      (model) => mappr.convert<MenuItemModel, MenuItem>(model),
     );
   }
 

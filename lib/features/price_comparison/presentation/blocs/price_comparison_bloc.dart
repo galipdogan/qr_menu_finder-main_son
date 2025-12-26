@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/compared_price.dart';
 import '../../domain/usecases/get_compared_prices.dart';
@@ -45,11 +46,11 @@ class PriceComparisonBloc
   String _mapFailureToMessage(Failure failure) {
     switch (failure) {
       case ServerFailure():
-        return 'Sunucu hatası. Fiyatlar alınamadı.';
+        return ErrorMessages.serverError;
       case NetworkFailure():
-        return 'İnternet bağlantısı yok.';
+        return ErrorMessages.noInternet;
       default:
-        return 'Beklenmedik bir hata oluştu.';
+        return ErrorMessages.unknownError;
     }
   }
 }

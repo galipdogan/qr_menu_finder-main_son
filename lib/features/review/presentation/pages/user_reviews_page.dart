@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../core/widgets/error_view.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
 import '../../../auth/presentation/blocs/auth_state.dart';
 import '../blocs/review_bloc.dart';
@@ -10,7 +12,7 @@ import '../widgets/review_card.dart';
 import '../widgets/edit_review_dialog.dart';
 
 class UserReviewsPage extends StatefulWidget {
-  const UserReviewsPage({super.key});
+  const UserReviewsPage({super.key, required String restaurantId});
 
   @override
   State<UserReviewsPage> createState() => _UserReviewsPageState();
@@ -35,11 +37,11 @@ class _UserReviewsPageState extends State<UserReviewsPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Yorumu Sil'),
-        content: const Text('Bu yorumu silmek istediğinizden emin misiniz?'),
+        content: const Text(ErrorMessages.confirmDeleteReview),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('İptal'),
+            child: const Text(ErrorMessages.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -92,7 +94,7 @@ class _UserReviewsPageState extends State<UserReviewsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Yorumlarım'),
+        title: const Text(ErrorMessages.reviewsTitle),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
@@ -116,26 +118,13 @@ class _UserReviewsPageState extends State<UserReviewsPage> {
         },
         builder: (context, state) {
           if (state is ReviewLoading) {
-            return const LoadingIndicator(message: 'Yorumlar yükleniyor...');
+            return LoadingIndicator(message: ErrorMessages.reviewsLoading);
           }
 
           if (state is ReviewError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    state.message,
-                    style: TextStyle(color: AppColors.error),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadReviews,
-                    child: const Text('Tekrar Dene'),
-                  ),
-                ],
-              ),
+            return ErrorView(
+              message: state.message,
+              onRetry: _loadReviews,
             );
           }
 
@@ -148,12 +137,11 @@ class _UserReviewsPageState extends State<UserReviewsPage> {
           if (reviews.isEmpty) {
             return EmptyState(
               icon: Icons.rate_review,
-              title: 'Henüz Yorum Yok',
-              subtitle:
-                  'Restoranlar hakkında yaptığınız yorumlar ve değerlendirmeler burada görünecek.',
+              title: ErrorMessages.reviewsEmptyTitle,
+              subtitle: ErrorMessages.reviewsEmptySubtitle,
               action: ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Geri Dön'),
+                child: const Text(ErrorMessages.goBack),
               ),
             );
           }

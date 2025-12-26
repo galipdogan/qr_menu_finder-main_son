@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/loading_indicator.dart';
@@ -38,7 +39,7 @@ class PriceComparisonSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Diğer Restoranlardaki Fiyatlar',
+              ErrorMessages.priceComparisonTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: AppConstants.defaultSpacing / 2),
@@ -46,13 +47,13 @@ class PriceComparisonSection extends StatelessWidget {
               builder: (context, state) {
                 if (state is PriceComparisonLoading) {
                   return const LoadingIndicator(
-                    message: 'Fiyatlar aranıyor...',
+                    message: ErrorMessages.priceSearching,
                   );
                 }
                 if (state is PriceComparisonError) {
                   return Center(
                     child: Text(
-                      'Fiyatlar yüklenemedi: ${state.message}',
+                      '${ErrorMessages.priceLoadFailedPrefix} ${state.message}',
                       style: const TextStyle(color: AppColors.error),
                     ),
                   );
@@ -63,7 +64,7 @@ class PriceComparisonSection extends StatelessWidget {
                       child: Padding(
                         padding: EdgeInsets.all(8.0),
                         child: Text(
-                          'Bu ürün için başka restoranda fiyat bulunamadı.',
+                          ErrorMessages.priceNotFound,
                         ),
                       ),
                     );

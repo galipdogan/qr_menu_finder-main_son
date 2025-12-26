@@ -4,6 +4,7 @@ import 'package:qr_menu_finder/features/restaurant/presentation/widgets/restaura
 import 'package:qr_menu_finder/features/restaurant/presentation/widgets/restaurant_error_view.dart';
 import 'package:qr_menu_finder/features/restaurant/presentation/widgets/restaurant_fallback_view.dart';
 
+import '../../../../core//widgets/loading_indicator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../analytics/domain/usecases/log_analytics_event.dart';
@@ -105,9 +106,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             );
           }
 
-          return const Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          );
+          return const LoadingIndicator();
         },
       ),
     );

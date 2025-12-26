@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../theme/app_colors.dart';
+import '../error/error_messages.dart';
 import 'glass_container.dart';
 
 enum SortOption {
@@ -144,7 +145,7 @@ class _FilterSortSheetState extends State<FilterSortSheet> {
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text(
-                      'Filtrele & Sırala',
+                      ErrorMessages.filterSortTitle,
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -157,7 +158,7 @@ class _FilterSortSheetState extends State<FilterSortSheet> {
                       TextButton.icon(
                         onPressed: _reset,
                         icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('Sıfırla'),
+                        label: const Text(ErrorMessages.reset),
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.primary,
                         ),
@@ -185,7 +186,7 @@ class _FilterSortSheetState extends State<FilterSortSheet> {
           // Sort Section
           const SizedBox(height: 16),
           const Text(
-            'Sırala',
+            ErrorMessages.sortLabel,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -196,25 +197,25 @@ class _FilterSortSheetState extends State<FilterSortSheet> {
             spacing: 8,
             children: [
               ChoiceChip(
-                label: const Text('Mesafe'),
+                label: const Text(ErrorMessages.sortDistance),
                 selected: _options.sortBy == SortOption.distance,
                 onSelected: (_) => _setSortBy(SortOption.distance),
                 selectedColor: AppColors.primary.withValues(alpha: 0.2),
               ),
               ChoiceChip(
-                label: const Text('Puan'),
+                label: const Text(ErrorMessages.sortRating),
                 selected: _options.sortBy == SortOption.rating,
                 onSelected: (_) => _setSortBy(SortOption.rating),
                 selectedColor: AppColors.primary.withValues(alpha: 0.2),
               ),
               ChoiceChip(
-                label: const Text('Yorum Sayısı'),
+                label: const Text(ErrorMessages.sortReviewCount),
                 selected: _options.sortBy == SortOption.reviewCount,
                 onSelected: (_) => _setSortBy(SortOption.reviewCount),
                 selectedColor: AppColors.primary.withValues(alpha: 0.2),
               ),
               ChoiceChip(
-                label: const Text('İsim'),
+                label: const Text(ErrorMessages.sortName),
                 selected: _options.sortBy == SortOption.name,
                 onSelected: (_) => _setSortBy(SortOption.name),
                 selectedColor: AppColors.primary.withValues(alpha: 0.2),
@@ -225,7 +226,7 @@ class _FilterSortSheetState extends State<FilterSortSheet> {
           // Rating Filter
           const SizedBox(height: 24),
           const Text(
-            'Minimum Puan',
+            ErrorMessages.minRatingLabel,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -257,7 +258,7 @@ class _FilterSortSheetState extends State<FilterSortSheet> {
           // Category Filter
           const SizedBox(height: 24),
           const Text(
-            'Kategoriler',
+            ErrorMessages.categoriesLabel,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -266,7 +267,7 @@ class _FilterSortSheetState extends State<FilterSortSheet> {
           const SizedBox(height: 8),
           if (widget.availableCategories.isEmpty)
             const Text(
-              'Kategori bulunamadı',
+              ErrorMessages.categoryNotFound,
               style: TextStyle(color: Colors.grey),
             )
           else
@@ -285,7 +286,7 @@ class _FilterSortSheetState extends State<FilterSortSheet> {
           // Apply Button
           const SizedBox(height: 28),
           GlassButton(
-            text: 'Uygula',
+            text: ErrorMessages.apply,
             icon: Icons.check_circle_rounded,
             width: double.infinity,
             height: 60,

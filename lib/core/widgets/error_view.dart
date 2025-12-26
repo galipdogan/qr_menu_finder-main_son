@@ -28,7 +28,7 @@ class ErrorView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Bir Hata Oluştu',
+              ErrorMessages.somethingWentWrong,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -46,7 +46,7 @@ class ErrorView extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Tekrar Dene'),
+                label: const Text(ErrorMessages.tryAgain),
               ),
             ],
           ],

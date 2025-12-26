@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../domain/entities/menu_item.dart';
 
 class MenuItemModel extends MenuItem {
@@ -63,7 +64,7 @@ class MenuItemModel extends MenuItem {
       description: map['description'] as String?,
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
       currency: map['currency'] ?? 'TRY',
-      category: map['category'] ?? 'Diğer',
+      category: map['category'] ?? ErrorMessages.otherCategory,
       imageUrls: map['imageUrls'] != null
           ? List<String>.from(map['imageUrls'] as List)
           : const [],
@@ -239,6 +240,8 @@ class MenuItemModel extends MenuItem {
     reportCount,
     previousPrices,
   ];
+
+  static fromJson(json) {}
 }
 
 class PriceHistory {

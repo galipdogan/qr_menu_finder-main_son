@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/error/error_messages.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -54,7 +55,7 @@ class RestaurantListItem extends StatelessWidget {
             children: [
               Icon(Icons.login, color: AppColors.primary),
               SizedBox(width: 12),
-              Text('Giriş Gerekli'),
+              Text(ErrorMessages.loginRequired),
             ],
           ),
           content: const Text(
@@ -78,7 +79,7 @@ class RestaurantListItem extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('Giriş Yap'),
+              child: const Text(ErrorMessages.login),
             ),
           ],
         );

@@ -3,12 +3,14 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../../core/error/error.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/maps/data/datasources/openstreetmap_details_remote_data_source.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/models/place_result.dart';
-import '../../../maps/data/datasources/openstreetmap_details_remote_data_source.dart';
-import '../../../maps/data/datasources/nominatim_remote_data_source.dart';
+import '../../../../core/models/nominatim_place.dart';
+import '../../../../core/services/nominatim_service.dart';
 import '../models/restaurant_model.dart';
-import '../services/restaurant_cache_service.dart';
+import '../cache/restaurant_cache_service.dart';
 
 /// Abstract restaurant remote data source
 abstract class RestaurantRemoteDataSource {
@@ -66,7 +68,7 @@ abstract class RestaurantRemoteDataSource {
 /// Artık Google Places API yerine Nominatim (OpenStreetMap) kullanıyor
 class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
   final FirebaseFirestore firestore;
-  final NominatimRemoteDataSource nominatimRemoteDataSource;
+  final NominatimService nominatimService;
   final OpenStreetMapDetailsRemoteDataSource osmDetailsService;
   late final RestaurantCacheService _cacheService;
 
@@ -77,7 +79,7 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
 
   RestaurantRemoteDataSourceImpl({
     required this.firestore,
-    required this.nominatimRemoteDataSource,
+    required this.nominatimService,
     required this.osmDetailsService,
   }) {
     _cacheService = RestaurantCacheService(firestore: firestore);
@@ -204,8 +206,8 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
     required int limit,
   }) async {
     AppLogger.i('🌐 Getting nearby restaurants from Nominatim (fast path)...');
-    final places = await nominatimRemoteDataSource.searchPlaces(
-      'restaurant', // Generic query for restaurants
+    final places = await nominatimService.searchNearby(
+      query: 'restaurant', // Generic query for restaurants
       latitude: latitude,
       longitude: longitude,
       limit: limit,
@@ -216,7 +218,17 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
       return [];
     }
 
-    final models = places
+    // Convert NominatimPlace to PlaceResult
+    final placeResults = places.map((place) => PlaceResult(
+      placeId: place.placeId.toString(),
+      name: place.displayName.split(',').first.trim(),
+      displayName: place.displayName,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      type: place.type ?? 'restaurant',
+    )).toList();
+
+    final models = placeResults
         .map((place) => _convertPlaceResultToRestaurantModel(place))
         .toList();
 
@@ -423,7 +435,7 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
       AppLogger.i('🔍 Searching restaurants for: "$query"');
 
       // Use Nominatim service for search (free and comprehensive)
-      final searchResults = await nominatimRemoteDataSource.searchPlaces(query);
+      final searchResults = await nominatimService.searchByText(query: query);
 
       AppLogger.i(
         '✅ Nominatim search returned ${searchResults.length} results',
@@ -464,7 +476,7 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
             imageUrls: [],
             rating: 4.0 + (place.name.hashCode.abs() % 10) / 10,
             reviewCount: (place.name.hashCode.abs() % 50) + 5,
-            categories: _parseCuisineTypes(place.type),
+            categories: _parseCuisineTypes(place.type ?? 'restaurant'),
             openingHours: {},
             isActive: true,
             createdAt: DateTime.now(),
@@ -623,7 +635,7 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
 
       // Regular Firebase restaurant
       AppLogger.i('🔥 This is a Firebase restaurant, querying Firestore...');
-      final doc = await firestore.collection('restaurants').doc(id).get();
+      final doc = await firestore.collection(AppConstants.restaurantsCollection).doc(id).get();
 
       if (!doc.exists) {
         AppLogger.w('⚠️ Restaurant not found in Firestore: $id');
@@ -649,7 +661,7 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
   Future<List<RestaurantModel>> getRestaurantsByOwnerId(String ownerId) async {
     try {
       final query = firestore
-          .collection('restaurants')
+          .collection(AppConstants.restaurantsCollection)
           .where('ownerId', isEqualTo: ownerId)
           .orderBy('createdAt', descending: true);
 
@@ -670,7 +682,7 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
   @override
   Future<RestaurantModel> createRestaurant(RestaurantModel restaurant) async {
     try {
-      final docRef = firestore.collection('restaurants').doc(restaurant.id);
+      final docRef = firestore.collection(AppConstants.restaurantsCollection).doc(restaurant.id);
       final restaurantWithId = restaurant.copyWith(id: docRef.id);
 
       await docRef.set(restaurantWithId.toFirestore());
@@ -689,7 +701,7 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
   Future<RestaurantModel> updateRestaurant(RestaurantModel restaurant) async {
     try {
       await firestore
-          .collection('restaurants')
+          .collection(AppConstants.restaurantsCollection)
           .doc(restaurant.id)
           .update(restaurant.toFirestore());
 
@@ -706,7 +718,7 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
   @override
   Future<void> deleteRestaurant(String id) async {
     try {
-      await firestore.collection('restaurants').doc(id).delete();
+      await firestore.collection(AppConstants.restaurantsCollection).doc(id).delete();
     } catch (e) {
       if (e.toString().toLowerCase().contains('network') ||
           e.toString().toLowerCase().contains('connection')) {
@@ -720,7 +732,7 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
   Future<List<RestaurantModel>> getPopularRestaurants({int limit = 10}) async {
     try {
       final query = firestore
-          .collection('restaurants')
+          .collection(AppConstants.restaurantsCollection)
           .where('isActive', isEqualTo: true)
           .orderBy('reviewCount', descending: true)
           .orderBy('rating', descending: true)
@@ -747,7 +759,7 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
   }) async {
     try {
       final query = firestore
-          .collection('restaurants')
+          .collection(AppConstants.restaurantsCollection)
           .where('categories', arrayContains: category)
           .where('isActive', isEqualTo: true)
           .limit(limit);
@@ -862,23 +874,19 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
   Map<String, String> _parseOpeningHours(String openingHours) {
     if (openingHours.isEmpty) return {};
 
-    try {
-      // Simple parsing for common formats like "Mo-Su 09:00-22:00"
-      if (openingHours.contains('Mo-Su') || openingHours.contains('24/7')) {
-        return {
-          'monday': openingHours,
-          'tuesday': openingHours,
-          'wednesday': openingHours,
-          'thursday': openingHours,
-          'friday': openingHours,
-          'saturday': openingHours,
-          'sunday': openingHours,
-        };
-      }
-
-      return {'general': openingHours};
-    } catch (e) {
-      return {'general': openingHours};
+    // Simple parsing for common formats like "Mo-Su 09:00-22:00"
+    if (openingHours.contains('Mo-Su') || openingHours.contains('24/7')) {
+      return {
+        'monday': openingHours,
+        'tuesday': openingHours,
+        'wednesday': openingHours,
+        'thursday': openingHours,
+        'friday': openingHours,
+        'saturday': openingHours,
+        'sunday': openingHours,
+      };
     }
+
+    return {'general': openingHours};
   }
 }

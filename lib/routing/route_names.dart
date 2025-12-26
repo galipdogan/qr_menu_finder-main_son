@@ -31,6 +31,7 @@ class RouteNames {
   static const String favorites = '/profile/favorites';
   static const String history = '/profile/history';
   static const String settings = '/profile/settings';
+  static const String userReviews = '/profile/reviews';
 
   // Owner
   static const String ownerPanel = '/owner/panel';

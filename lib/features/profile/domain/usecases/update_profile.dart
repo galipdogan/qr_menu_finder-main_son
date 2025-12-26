@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../entities/user_profile.dart';
+import '../../../auth/domain/entities/user.dart';
 import '../repositories/profile_repository.dart';
 
 /// Use case for updating user profile
@@ -24,7 +24,7 @@ class UpdateProfile implements UseCase<void, UpdateProfileParams> {
 
 /// Parameters for updating profile
 class UpdateProfileParams extends Equatable {
-  final UserProfile profile;
+  final User profile;
 
   const UpdateProfileParams({required this.profile});
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/error/error_messages.dart';
 
 class SearchFiltersBottomSheet extends StatefulWidget {
   final String? initialCity;
@@ -133,7 +134,7 @@ class _SearchFiltersBottomSheetState extends State<SearchFiltersBottomSheet> {
                 child: Row(
                   children: [
                     const Text(
-                      'Filtreler',
+                      ErrorMessages.filtersTitle,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -142,12 +143,12 @@ class _SearchFiltersBottomSheetState extends State<SearchFiltersBottomSheet> {
                     const Spacer(),
                     TextButton(
                       onPressed: _clearAll,
-                      child: const Text('Temizle'),
+                      child: const Text(ErrorMessages.clear),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: _apply,
-                      child: const Text('Uygula'),
+                      child: const Text(ErrorMessages.apply),
                     ),
                   ],
                 ),
@@ -162,7 +163,7 @@ class _SearchFiltersBottomSheetState extends State<SearchFiltersBottomSheet> {
                   children: [
                     // City filter
                     const Text(
-                      'Şehir',
+                      ErrorMessages.citySimple,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -192,7 +193,7 @@ class _SearchFiltersBottomSheetState extends State<SearchFiltersBottomSheet> {
 
                     // Category filter
                     const Text(
-                      'Kategori',
+                      ErrorMessages.categoryLabel,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -222,7 +223,7 @@ class _SearchFiltersBottomSheetState extends State<SearchFiltersBottomSheet> {
 
                     // Price range
                     const Text(
-                      'Fiyat Aralığı',
+                      ErrorMessages.priceRangeLabel,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -279,8 +280,8 @@ class _SearchFiltersBottomSheetState extends State<SearchFiltersBottomSheet> {
                       min: 0,
                       max: 5,
                       divisions: 10,
-                      label: _minRating == null || _minRating == 0
-                          ? 'Hepsi'
+                            label: _minRating == null || _minRating == 0
+                          ? ErrorMessages.all
                           : _minRating!.toStringAsFixed(1),
                       onChanged: (value) {
                         setState(() {
@@ -289,9 +290,9 @@ class _SearchFiltersBottomSheetState extends State<SearchFiltersBottomSheet> {
                       },
                     ),
                     Center(
-                      child: Text(
+                        child: Text(
                         _minRating == null || _minRating == 0
-                            ? 'Tüm puanlar'
+                            ? ErrorMessages.all
                             : '${_minRating!.toStringAsFixed(1)} ve üzeri',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),

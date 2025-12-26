@@ -1,0 +1,24 @@
+﻿Analyzing qr_menu_finder-main_son...                            
+
+  error - Undefined name 'photonRemoteDataSource' - lib\features\home\data\datasources\location_remote_data_source.dart:127:35 - undefined_identifier
+  error - Undefined name 'nominatimService' - lib\features\home\data\datasources\location_remote_data_source.dart:143:38 - undefined_identifier
+  error - Undefined name 'restaurantRemoteDataSource' - lib\features\home\data\datasources\location_remote_data_source.dart:159:38 - undefined_identifier
+  error - Expected a method, getter, setter or operator declaration - lib\features\home\data\datasources\location_remote_data_source.dart:207:1 - expected_executable
+  error - The method 'getTurkeyLocations' isn't defined for the type 'LocationRemoteDataSource' - lib\features\home\data\repositories\location_repository_impl.dart:52:30 - undefined_method
+  error - 'MenuCacheService.set' ('void Function(String, List<MenuItemModel>)') isn't a valid override of 'CacheService.set' ('Future<void> Function(String, List<MenuItemModel>, {Duration? ttl})') - lib\features\menu\data\cache\menu_cache_service.dart:25:8 - invalid_override
+  error - 'MenuCacheService.remove' ('void Function(String)') isn't a valid override of 'CacheService.remove' ('Future<void> Function(String)') - lib\features\menu\data\cache\menu_cache_service.dart:31:8 - invalid_override
+  error - 'MenuCacheService.clear' ('void Function()') isn't a valid override of 'CacheService.clear' ('Future<void> Function()') - lib\features\menu\data\cache\menu_cache_service.dart:37:8 - invalid_override
+   info - Uses 'await' on an instance of 'void', which is not a subtype of 'Future' - lib\features\menu\data\datasources\menu_remote_data_source_impl.dart:38:5 - await_only_futures
+  error - This expression has a type of 'void' so its value can't be used - lib\features\menu\data\datasources\menu_remote_data_source_impl.dart:38:17 - use_of_void_result
+  error - The name 'CommentsPage' isn't a class - lib\features\profile\presentation\pages\profile_page.dart:205:39 - creation_with_non_type
+warning - Unused import: '../../../../core/models/nominatim_place.dart' - lib\features\restaurant\data\datasources\restaurant_remote_data_source.dart:10:8 - unused_import
+  error - The argument type 'NominatimPlace' can't be assigned to the parameter type 'PlaceResult'.  - lib\features\restaurant\data\datasources\restaurant_remote_data_source.dart:222:62 - argument_type_not_assignable
+  error - The argument type 'String?' can't be assigned to the parameter type 'String'.  - lib\features\restaurant\data\datasources\restaurant_remote_data_source.dart:469:44 - argument_type_not_assignable
+
+flutter : 14 issues found. (ran in 5.6s)
+At line:1 char:1
++ flutter analyze 2>&1 | Out-File -FilePath analyze_full.txt -Encoding  ...
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (14 i    ssues found. (ran in 5.6s):String) [], Remote    Exception
+    + FullyQualifiedErrorId : NativeCommandError
+ 

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/error/error.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../models/search_response_model.dart';
 
 /// Abstract search remote data source
@@ -49,7 +50,7 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
       // OPTIMIZED: Search restaurants with WHERE clause
       // Only fetch active restaurants
       final restaurantsQuery = await firestore
-          .collection('restaurants')
+          .collection(AppConstants.restaurantsCollection)
           .where('isActive', isEqualTo: true)
           .limit(hitsPerPage * 2) // Fetch more to account for filtering
           .get();
@@ -68,7 +69,7 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
       // OPTIMIZED: Search menu items - only if we need more results
       if (allHits.length < hitsPerPage) {
         final menuItemsQuery = await firestore
-            .collection('menuItems')
+            .collection(AppConstants.itemsCollection)
             .limit(hitsPerPage)
             .get();
 
@@ -144,7 +145,7 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
 
       // OPTIMIZED: Only get active restaurants with limit
       final restaurantsQuery = await firestore
-          .collection('restaurants')
+          .collection(AppConstants.restaurantsCollection)
           .where('isActive', isEqualTo: true)
           .limit(10) // Increased limit for better suggestions
           .get();

@@ -6,6 +6,7 @@ import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../routing/app_navigation.dart';
 import '../../../../injection_container.dart' as di;
+import '../../../../core/error/error_messages.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
 import '../../../auth/presentation/blocs/auth_state.dart';
 import '../../../favorites/presentation/blocs/favorites_bloc.dart';
@@ -78,7 +79,7 @@ class RestaurantListPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            searchQuery != null ? 'Arama Sonuçları' : 'Yakındaki Restoranlar',
+            searchQuery != null ? ErrorMessages.searchResults : ErrorMessages.nearbyRestaurants,
           ),
           backgroundColor: ThemeProvider.primary(context),
           foregroundColor: ThemeProvider.onPrimary(context),
@@ -109,10 +110,10 @@ class RestaurantListPage extends StatelessWidget {
               if (state.restaurants.isEmpty) {
                 return EmptyState(
                   icon: Icons.restaurant,
-                  title: 'Restoran Bulunamadı',
+                  title: ErrorMessages.restaurantListEmptyTitle,
                   subtitle: searchQuery != null
-                      ? 'Arama kriterlerinize uygun restoran bulunamadı.'
-                      : 'Bu bölgede restoran bulunamadı.',
+                      ? ErrorMessages.restaurantListEmptySearch
+                      : ErrorMessages.restaurantListEmptyNearby,
                 );
               }
 
@@ -163,11 +164,10 @@ class RestaurantListPage extends StatelessWidget {
               );
             }
 
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.restaurant,
-              title: 'Restoranlar',
-              subtitle:
-                  'Restoranları görüntülemek için konum bilginizi paylaşın.',
+              title: ErrorMessages.restaurantsTitle,
+              subtitle: ErrorMessages.restaurantsInstruction,
             );
           },
         ),

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/review_model.dart';
+import '../../../../core/constants/app_constants.dart';
 
 abstract class ReviewRemoteDataSource {
   Future<List<ReviewModel>> getReviewsByUser(String userId);
@@ -27,7 +28,7 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
   @override
   Future<List<ReviewModel>> getReviewsByUser(String userId) async {
     final querySnapshot = await firestore
-        .collection('reviews')
+        .collection(AppConstants.reviewsCollection)
         .where('userId', isEqualTo: userId)
         .orderBy('createdAt', descending: true)
         .get();
@@ -40,7 +41,7 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
   @override
   Future<List<ReviewModel>> getReviewsByRestaurant(String restaurantId) async {
     final querySnapshot = await firestore
-        .collection('reviews')
+        .collection(AppConstants.reviewsCollection)
         .where('restaurantId', isEqualTo: restaurantId)
         .orderBy('createdAt', descending: true)
         .get();
@@ -68,7 +69,7 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
       updatedAt: now,
     );
 
-    final docRef = await firestore.collection('reviews').add(review.toFirestore());
+    final docRef = await firestore.collection(AppConstants.reviewsCollection).add(review.toFirestore());
     final doc = await docRef.get();
 
     return ReviewModel.fromFirestore(doc);
@@ -87,21 +88,21 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
     if (text != null) updateData['text'] = text;
     if (rating != null) updateData['rating'] = rating;
 
-    await firestore.collection('reviews').doc(reviewId).update(updateData);
+    await firestore.collection(AppConstants.reviewsCollection).doc(reviewId).update(updateData);
 
-    final doc = await firestore.collection('reviews').doc(reviewId).get();
+    final doc = await firestore.collection(AppConstants.reviewsCollection).doc(reviewId).get();
     return ReviewModel.fromFirestore(doc);
   }
 
   @override
   Future<void> deleteReview(String reviewId) async {
-    await firestore.collection('reviews').doc(reviewId).delete();
+    await firestore.collection(AppConstants.reviewsCollection).doc(reviewId).delete();
   }
 
   @override
   Future<ReviewModel?> getUserReviewForRestaurant(String userId, String restaurantId) async {
     final querySnapshot = await firestore
-        .collection('reviews')
+        .collection(AppConstants.reviewsCollection)
         .where('userId', isEqualTo: userId)
         .where('restaurantId', isEqualTo: restaurantId)
         .limit(1)

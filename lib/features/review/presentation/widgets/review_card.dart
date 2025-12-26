@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/review.dart';
 
@@ -77,7 +78,7 @@ class ReviewCard extends StatelessWidget {
                 if (review.createdAt != review.updatedAt) ...[
                   const SizedBox(width: 8),
                   Text(
-                    '(düzenlendi)',
+                    ErrorMessages.editedSuffix,
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
@@ -96,7 +97,7 @@ class ReviewCard extends StatelessWidget {
                 TextButton.icon(
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Düzenle'),
+                  label: const Text(ErrorMessages.edit),
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.primary,
                   ),
@@ -105,7 +106,7 @@ class ReviewCard extends StatelessWidget {
                 TextButton.icon(
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete, size: 18),
-                  label: const Text('Sil'),
+                  label: Text(ErrorMessages.delete),
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.error,
                   ),

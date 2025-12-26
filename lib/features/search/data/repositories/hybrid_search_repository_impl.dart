@@ -42,60 +42,59 @@ class HybridSearchRepositoryImpl implements SearchRepository {
     return _searchWithFirestore(query);
   }
 
+  Map<String, String> _buildFilters(SearchQuery query) {
+    final filters = <String, String>{};
+    if (query.city?.isNotEmpty ?? false) filters['city'] = query.city!;
+    if (query.district?.isNotEmpty ?? false) filters['district'] = query.district!;
+    if (query.category?.isNotEmpty ?? false) filters['category'] = query.category!;
+    return filters;
+  }
+
+  SearchResponse _applyClientFilters(SearchResponse response, SearchQuery query) {
+    var results = response.results;
+
+    // Filter by price range
+    if (query.minPrice != null || query.maxPrice != null) {
+      results = results.where((result) {
+        if (result.price == null) return false;
+        final price = result.price!;
+        if (query.minPrice != null && price < query.minPrice!) return false;
+        if (query.maxPrice != null && price > query.maxPrice!) return false;
+        return true;
+      }).toList();
+    }
+
+    // Filter by minimum rating
+    if (query.minRating != null) {
+      results = results.where((result) {
+        if (result.rating == null) return false;
+        return result.rating! >= query.minRating!;
+      }).toList();
+    }
+
+    return SearchResponse(
+      results: results,
+      totalHits: results.length,
+      currentPage: query.page,
+      totalPages: (results.length / query.hitsPerPage).ceil(),
+      hitsPerPage: query.hitsPerPage,
+    );
+  }
+
   /// Search using MeiliSearch
   Future<Either<Failure, SearchResponse>> _searchWithMeiliSearch(
     SearchQuery query,
   ) async {
     return RepositoryHelper.execute(() async {
-      // Build filters map
-      final filters = <String, String>{};
-      if (query.city != null && query.city!.isNotEmpty) {
-        filters['city'] = query.city!;
-      }
-      if (query.district != null && query.district!.isNotEmpty) {
-        filters['district'] = query.district!;
-      }
-      if (query.category != null && query.category!.isNotEmpty) {
-        filters['category'] = query.category!;
-      }
-
+      final filters = _buildFilters(query);
       final responseModel = await meilisearchDataSource!.searchItems(
         query: query.query,
         filters: filters.isNotEmpty ? filters : null,
         page: query.page,
         hitsPerPage: query.hitsPerPage,
       );
-
-      // Apply client-side filtering for price and rating
-      var results = responseModel.results;
-
-      // Filter by price range
-      if (query.minPrice != null || query.maxPrice != null) {
-        results = results.where((result) {
-          if (result.price == null) return false;
-          final price = result.price!;
-          if (query.minPrice != null && price < query.minPrice!) return false;
-          if (query.maxPrice != null && price > query.maxPrice!) return false;
-          return true;
-        }).toList();
-      }
-
-      // Filter by minimum rating
-      if (query.minRating != null) {
-        results = results.where((result) {
-          if (result.rating == null) return false;
-          return result.rating! >= query.minRating!;
-        }).toList();
-      }
-
-      // Create filtered response
-      return SearchResponse(
-        results: results,
-        totalHits: results.length,
-        currentPage: query.page,
-        totalPages: (results.length / query.hitsPerPage).ceil(),
-        hitsPerPage: query.hitsPerPage,
-      );
+      
+      return _applyClientFilters(responseModel, query);
     }, (response) => response as SearchResponse);
   }
 
@@ -104,18 +103,7 @@ class HybridSearchRepositoryImpl implements SearchRepository {
     SearchQuery query,
   ) async {
     return RepositoryHelper.execute(() async {
-      // Build filters map
-      final filters = <String, String>{};
-      if (query.city != null && query.city!.isNotEmpty) {
-        filters['city'] = query.city!;
-      }
-      if (query.district != null && query.district!.isNotEmpty) {
-        filters['district'] = query.district!;
-      }
-      if (query.category != null && query.category!.isNotEmpty) {
-        filters['category'] = query.category!;
-      }
-
+      final filters = _buildFilters(query);
       final responseModel = await firestoreDataSource.searchItems(
         query: query.query,
         filters: filters.isNotEmpty ? filters : null,
@@ -123,36 +111,7 @@ class HybridSearchRepositoryImpl implements SearchRepository {
         hitsPerPage: query.hitsPerPage,
       );
 
-      // Apply client-side filtering for price and rating
-      var results = responseModel.results;
-
-      // Filter by price range
-      if (query.minPrice != null || query.maxPrice != null) {
-        results = results.where((result) {
-          if (result.price == null) return false;
-          final price = result.price!;
-          if (query.minPrice != null && price < query.minPrice!) return false;
-          if (query.maxPrice != null && price > query.maxPrice!) return false;
-          return true;
-        }).toList();
-      }
-
-      // Filter by minimum rating
-      if (query.minRating != null) {
-        results = results.where((result) {
-          if (result.rating == null) return false;
-          return result.rating! >= query.minRating!;
-        }).toList();
-      }
-
-      // Create filtered response
-      return SearchResponse(
-        results: results,
-        totalHits: results.length,
-        currentPage: query.page,
-        totalPages: (results.length / query.hitsPerPage).ceil(),
-        hitsPerPage: query.hitsPerPage,
-      );
+      return _applyClientFilters(responseModel, query);
     }, (response) => response as SearchResponse);
   }
 

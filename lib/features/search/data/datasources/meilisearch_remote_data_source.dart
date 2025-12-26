@@ -1,5 +1,6 @@
 import 'package:meilisearch/meilisearch.dart';
 import '../../../../core/error/error.dart';
+import '../../../../core/config/meilisearch_config.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../models/search_response_model.dart';
 
@@ -34,8 +35,9 @@ class MeiliSearchRemoteDataSourceImpl implements MeiliSearchRemoteDataSource {
   final MeiliSearchClient client;
 
   // Index names
-  static const String restaurantsIndex = 'restaurants';
-  static const String menuItemsIndex = 'menu_items';
+  // Index names
+  static const String restaurantsIndex = MeiliSearchConfig.restaurantsIndexName;
+  static const String menuItemsIndex = MeiliSearchConfig.menuItemsIndexName;
 
   MeiliSearchRemoteDataSourceImpl({required this.client});
 

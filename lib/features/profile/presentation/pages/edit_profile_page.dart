@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../auth/domain/entities/user.dart' as auth;
 import '../blocs/profile_bloc.dart';
-import '../../../../core/utils/user_extensions.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/error/error_messages.dart';
 
 class EditProfilePage extends StatefulWidget {
   final auth.User user;
@@ -42,13 +43,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
       return;
     }
 
-    final userProfile = widget.user.toUserProfile();
-    final updatedProfile = userProfile.copyWith(
+    final updatedUser = widget.user.copyWith(
       name: _nameController.text.trim(),
     );
 
     context.read<ProfileBloc>().add(
-      ProfileUpdateRequested(profile: updatedProfile),
+      ProfileUpdateRequested(profile: updatedUser),
     );
   }
 
@@ -58,8 +58,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
       listener: (context, state) {
         if (state is ProfileUpdated) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profil başarıyla güncellendi!'),
+            SnackBar(
+              content: Text(ErrorMessages.profileUpdatedSuccess),
               backgroundColor: AppColors.success,
             ),
           );
@@ -78,7 +78,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Profili Düzenle'),
+            title: const Text(ErrorMessages.editProfileTitle),
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
           ),
@@ -133,14 +133,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Ad Soyad *',
+                    labelText: ErrorMessages.nameLabel,
                     prefixIcon: Icon(Icons.person),
                     border: OutlineInputBorder(),
                   ),
                   enabled: !isLoading,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Ad soyad gerekli';
+                      return ErrorMessages.nameRequired;
                     }
                     return null;
                   },
@@ -151,10 +151,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
-                    labelText: 'E-posta',
+                    labelText: ErrorMessages.emailLabel,
                     prefixIcon: Icon(Icons.email),
                     border: OutlineInputBorder(),
-                    helperText: 'E-posta adresi değiştirilemez',
+                    helperText: ErrorMessages.emailCannotChange,
                   ),
                   enabled: false,
                 ),
@@ -174,7 +174,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Hesap Türü',
+                                ErrorMessages.accountTypeLabel,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -205,10 +205,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                     ),
-                    child: isLoading
+                        child: isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text(
-                            'Değişiklikleri Kaydet',
+                            ErrorMessages.saveChangesLabel,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -223,7 +223,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   onPressed: isLoading
                       ? null
                       : () => Navigator.of(context).pop(),
-                  child: const Text('İptal'),
+                  child: const Text(ErrorMessages.cancel),
                 ),
               ],
             ),
@@ -236,13 +236,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
   String _getRoleText(auth.UserRole role) {
     switch (role) {
       case auth.UserRole.user:
-        return 'Normal Kullanıcı';
+        return ErrorMessages.roleUser;
       case auth.UserRole.owner:
-        return 'İşletme Sahibi';
+        return ErrorMessages.roleOwner;
       case auth.UserRole.admin:
-        return 'Yönetici';
+        return ErrorMessages.roleAdmin;
       case auth.UserRole.pendingOwner:
-        return 'İşletme Sahibi (Onay Bekliyor)';
+        return ErrorMessages.rolePendingOwner;
     }
   }
 }

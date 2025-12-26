@@ -1,16 +1,28 @@
 import 'package:dartz/dartz.dart';
+//import 'package:qr_menu_finder/core/error/exceptions.dart';
 import '../../../../core/error/error.dart';
+import '../../../../core/network/network_info.dart';
 import '../../../../core/utils/repository_helper.dart';
+import '../../../../core/mapper/mapper.dart';
 import '../../domain/entities/restaurant.dart';
 import '../../domain/repositories/restaurant_repository.dart';
+import '../datasources/restaurant_local_data_source.dart';
 import '../datasources/restaurant_remote_data_source.dart';
 import '../models/restaurant_model.dart';
 
 /// Implementation of restaurant repository
 class RestaurantRepositoryImpl implements RestaurantRepository {
   final RestaurantRemoteDataSource remoteDataSource;
+  final RestaurantLocalDataSource localDataSource;
+  final NetworkInfo networkInfo;
+  final Mappr mappr;
 
-  RestaurantRepositoryImpl({required this.remoteDataSource});
+  RestaurantRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+    required this.networkInfo,
+    required this.mappr,
+  });
 
   @override
   Future<Either<Failure, List<Restaurant>>> getNearbyRestaurants({
@@ -19,15 +31,80 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
     int radiusMeters = 5000,
     int limit = 20,
   }) async {
-    return RepositoryHelper.executeList(
-      () => remoteDataSource.getNearbyRestaurants(
-        latitude: latitude,
-        longitude: longitude,
-        radiusMeters: radiusMeters,
-        limit: limit,
-      ),
-      (model) => model.toEntity(),
-    );
+    if (await networkInfo.isConnected) {
+      try {
+        final remoteRestaurants = await remoteDataSource.getNearbyRestaurants(
+          latitude: latitude,
+          longitude: longitude,
+          radiusMeters: radiusMeters,
+          limit: limit,
+        );
+        await localDataSource.cacheNearbyRestaurants(
+          remoteRestaurants,
+          latitude,
+          longitude,
+        );
+        return Right(
+          remoteRestaurants
+              .map(
+                (e) => mappr.convert<RestaurantModel, Restaurant>(e),
+              )
+              .toList(),
+        );
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message, code: e.code));
+      }
+    } else {
+      try {
+        final localRestaurants = await localDataSource.getNearbyRestaurants(
+          latitude,
+          longitude,
+        );
+        if (localRestaurants != null) {
+          return Right(
+            localRestaurants
+                .map(
+                  (e) => mappr.convert<RestaurantModel, Restaurant>(e),
+                )
+                .toList(),
+          );
+        } else {
+          return Left(CacheFailure('No cached data available.'));
+        }
+      } on CacheException {
+        return Left(CacheFailure('Failed to retrieve data from cache.'));
+      }
+    }
+  }
+
+  @override
+  Future<Either<Failure, Restaurant>> getRestaurantById(String id) async {
+    // Try getting from cache first
+    try {
+      final localRestaurant = await localDataSource.getRestaurantById(id);
+      if (localRestaurant != null) {
+        return Right(
+          mappr.convert<RestaurantModel, Restaurant>(localRestaurant),
+        );
+      }
+    } on CacheException {
+      // Ignore cache failure and proceed to remote
+    }
+
+    // If not in cache or cache failed, get from remote
+    if (await networkInfo.isConnected) {
+      try {
+        final remoteRestaurant = await remoteDataSource.getRestaurantById(id);
+        await localDataSource.cacheRestaurant(remoteRestaurant);
+        return Right(
+          mappr.convert<RestaurantModel, Restaurant>(remoteRestaurant),
+        );
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message, code: e.code));
+      }
+    } else {
+      return Left(NetworkFailure('No internet connection.'));
+    }
   }
 
   @override
@@ -44,15 +121,7 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
         longitude: longitude,
         limit: limit,
       ),
-      (model) => model.toEntity(),
-    );
-  }
-
-  @override
-  Future<Either<Failure, Restaurant>> getRestaurantById(String id) async {
-    return RepositoryHelper.execute(
-      () => remoteDataSource.getRestaurantById(id),
-      (model) => model.toEntity(),
+      (model) => mappr.convert<RestaurantModel, Restaurant>(model),
     );
   }
 
@@ -62,7 +131,7 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
   ) async {
     return RepositoryHelper.executeList(
       () => remoteDataSource.getRestaurantsByOwnerId(ownerId),
-      (model) => model.toEntity(),
+      (model) => mappr.convert<RestaurantModel, Restaurant>(model),
     );
   }
 
@@ -70,18 +139,16 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
   Future<Either<Failure, Restaurant>> createRestaurant(
     Restaurant restaurant,
   ) async {
-    if (restaurant is! RestaurantModel) {
-      return Left(
-        GeneralFailure(
-          'createRestaurant requires a full RestaurantModel, but received a base Restaurant entity.',
-        ),
-      );
-    }
     try {
-      final createdRestaurantModel = await remoteDataSource.createRestaurant(
+      final restaurantModel = mappr.convert<Restaurant, RestaurantModel>(
         restaurant,
       );
-      return Right(createdRestaurantModel.toEntity());
+      final createdRestaurantModel = await remoteDataSource.createRestaurant(
+        restaurantModel,
+      );
+      return Right(
+        mappr.convert<RestaurantModel, Restaurant>(createdRestaurantModel),
+      );
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
     } catch (e) {
@@ -93,18 +160,16 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
   Future<Either<Failure, Restaurant>> updateRestaurant(
     Restaurant restaurant,
   ) async {
-    if (restaurant is! RestaurantModel) {
-      return Left(
-        GeneralFailure(
-          'updateRestaurant requires a full RestaurantModel, but received a base Restaurant entity.',
-        ),
-      );
-    }
     try {
-      final updatedRestaurantModel = await remoteDataSource.updateRestaurant(
+      final restaurantModel = mappr.convert<Restaurant, RestaurantModel>(
         restaurant,
       );
-      return Right(updatedRestaurantModel.toEntity());
+      final updatedRestaurantModel = await remoteDataSource.updateRestaurant(
+        restaurantModel,
+      );
+      return Right(
+        mappr.convert<RestaurantModel, Restaurant>(updatedRestaurantModel),
+      );
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
     } catch (e) {
@@ -125,7 +190,7 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
   }) async {
     return RepositoryHelper.executeList(
       () => remoteDataSource.getPopularRestaurants(limit: limit),
-      (model) => model.toEntity(),
+      (model) => mappr.convert<RestaurantModel, Restaurant>(model),
     );
   }
 
@@ -139,7 +204,7 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
         category: category,
         limit: limit,
       ),
-      (model) => model.toEntity(),
+      (model) => mappr.convert<RestaurantModel, Restaurant>(model),
     );
   }
 }

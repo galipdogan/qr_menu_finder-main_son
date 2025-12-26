@@ -1,10 +1,9 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/error.dart';
 import '../../../../core/utils/repository_helper.dart';
-import '../../domain/entities/user_profile.dart';
+import '../../../auth/domain/entities/user.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../datasources/profile_remote_data_source.dart';
-import '../models/user_profile_model.dart';
 
 /// Implementation of profile repository
 class ProfileRepositoryImpl implements ProfileRepository {
@@ -13,29 +12,30 @@ class ProfileRepositoryImpl implements ProfileRepository {
   ProfileRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, UserProfile>> getUserProfile(String uid) async {
+  Future<Either<Failure, User>> getUserProfile(String uid) async {
     return RepositoryHelper.execute(
       () => remoteDataSource.getUserProfile(uid),
-      (model) => model.toEntity(),
+      (model) => model as User,
     );
   }
 
   @override
-  Future<Either<Failure, void>> updateProfile(UserProfile profile) async {
+  Future<Either<Failure, void>> updateProfile(User profile) async {
     return RepositoryHelper.executeVoid(() {
-      final profileModel = UserProfileModel.fromEntity(profile);
+      // Convert User to UserModel for data source
+      final profileModel = profile as dynamic; // UserModel extends User
       return remoteDataSource.updateProfile(profileModel);
     });
   }
 
   @override
-  Stream<Either<Failure, UserProfile>> streamUserProfile(String uid) {
+  Stream<Either<Failure, User>> streamUserProfile(String uid) {
     try {
       return remoteDataSource
           .streamUserProfile(uid)
           .map(
             (profileModel) =>
-                Right<Failure, UserProfile>(profileModel.toEntity()),
+                Right<Failure, User>(profileModel),
           );
     } on ServerException catch (e) {
       return Stream.value(Left(ServerFailure(e.message, code: e.code)));

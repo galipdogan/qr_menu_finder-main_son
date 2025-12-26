@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/error/error_messages.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -135,7 +136,7 @@ class UserMenuButton extends StatelessWidget {
                     children: [
                       Icon(Icons.login),
                       SizedBox(width: 8),
-                      Text('Giriş Yap'),
+                      Text(ErrorMessages.login),
                     ],
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 
@@ -30,7 +31,7 @@ class MenuCategoryFilter extends StatelessWidget {
         itemBuilder: (context, index) {
           final category = categories[index];
           final isSelected = selectedCategory == category;
-          final displayName = category ?? 'Tümü';
+          final displayName = category ?? ErrorMessages.all;
 
           return Padding(
             padding: const EdgeInsets.only(right: 8),

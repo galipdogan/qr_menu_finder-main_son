@@ -7,6 +7,7 @@ import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../injection_container.dart' as di;
 import '../../../../routing/app_navigation.dart';
+import '../../../../core/error/error_messages.dart';
 import '../blocs/menu_bloc.dart';
 import '../widgets/menu_item_card.dart';
 import '../widgets/menu_category_filter.dart';
@@ -61,7 +62,7 @@ class _MenuPageState extends State<MenuPage> {
       value: _menuBloc,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.restaurantName ?? 'Menü'),
+          title: Text(widget.restaurantName ?? ErrorMessages.menuTitle),
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           actions: [
@@ -105,10 +106,10 @@ class _MenuPageState extends State<MenuPage> {
                     if (state.menuItems.isEmpty) {
                       return EmptyState(
                         icon: Icons.restaurant_menu,
-                        title: 'Menü Bulunamadı',
+                        title: ErrorMessages.menuNotFound,
                         subtitle: _selectedCategory != null
-                            ? 'Bu kategoride menü öğesi bulunamadı.'
-                            : 'Bu restoran için henüz menü eklenmemiş.',
+                            ? ErrorMessages.menuCategoryEmpty
+                            : ErrorMessages.menuEmptyForRestaurant,
                       );
                     }
 
@@ -138,8 +139,8 @@ class _MenuPageState extends State<MenuPage> {
 
                   return const EmptyState(
                     icon: Icons.restaurant_menu,
-                    title: 'Menü',
-                    subtitle: 'Menü öğelerini görüntülemek için yenileyin.',
+                    title: ErrorMessages.menuTitle,
+                    subtitle: ErrorMessages.menuEmptyPrompt,
                   );
                 },
               ),

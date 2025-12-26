@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../injection_container.dart' as di;
 import '../../../../routing/app_navigation.dart';
@@ -65,7 +66,7 @@ class _InstantSearchWidgetState extends State<InstantSearchWidget> {
               return _buildInitialState();
             }
             if (state is SearchLoading) {
-              return const LoadingIndicator(message: 'Aranıyor...');
+              return const LoadingIndicator(message: ErrorMessages.searching);
             }
             if (state is SearchError) {
               return _buildErrorState(state.message);
@@ -88,7 +89,7 @@ class _InstantSearchWidgetState extends State<InstantSearchWidget> {
           focusNode: _focusNode,
           autofocus: true,
           decoration: InputDecoration(
-            hintText: 'Restoran veya yemek ara...',
+            hintText: ErrorMessages.searchHint,
             border: InputBorder.none,
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
@@ -135,7 +136,7 @@ class _InstantSearchWidgetState extends State<InstantSearchWidget> {
           Icon(Icons.search, size: 80, color: Colors.grey[300]),
           const SizedBox(height: AppConstants.defaultSpacing),
           Text(
-            'Restoran veya yemek aramaya başlayın',
+            ErrorMessages.searchStartSubtitle,
             style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
         ],
@@ -169,7 +170,7 @@ class _InstantSearchWidgetState extends State<InstantSearchWidget> {
             Icon(Icons.search_off, size: 80, color: Colors.grey[300]),
             const SizedBox(height: AppConstants.defaultSpacing),
             Text(
-              'Sonuç bulunamadı',
+              ErrorMessages.searchNoResultsTitle,
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
           ],

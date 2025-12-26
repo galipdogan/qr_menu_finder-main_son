@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/error/error_messages.dart';
 
 class EditReviewDialog extends StatefulWidget {
   final String initialText;
@@ -35,14 +36,14 @@ class _EditReviewDialogState extends State<EditReviewDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Yorumu Düzenle'),
+      title: const Text(ErrorMessages.editReviewTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Rating section
-            const Text('Puanlama'),
+            const Text(ErrorMessages.ratingLabel),
             const SizedBox(height: 8),
             Row(
               children: List.generate(5, (index) {
@@ -65,7 +66,7 @@ class _EditReviewDialogState extends State<EditReviewDialog> {
             TextField(
               controller: _textController,
               decoration: const InputDecoration(
-                labelText: 'Yorumunuz',
+                labelText: ErrorMessages.reviewLabel,
                 border: OutlineInputBorder(),
               ),
               maxLines: 4,
@@ -77,7 +78,7 @@ class _EditReviewDialogState extends State<EditReviewDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('İptal'),
+          child: const Text(ErrorMessages.cancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -93,7 +94,7 @@ class _EditReviewDialogState extends State<EditReviewDialog> {
             backgroundColor: AppColors.primary,
             foregroundColor: AppColors.textOnPrimary,
           ),
-          child: const Text('Kaydet'),
+          child: const Text(ErrorMessages.save),
         ),
       ],
     );

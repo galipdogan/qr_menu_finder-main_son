@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:io';
+import '../../../../core/error/error_messages.dart';
 import '../../presentation/blocs/menu_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -46,13 +47,13 @@ class _AddMenuPageState extends State<AddMenuPage> {
         // Handle photo upload
         await _handlePhotoUpload(_selectedImage!, widget.restaurantId!);
       } else {
-        throw Exception('Lütfen geçerli bir menü seçin');
+        throw Exception(ErrorMessages.invalidMenuSelection);
       }
 
-      if (mounted) {
+        if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Menü başarıyla eklendi!'),
+          SnackBar(
+            content: Text(ErrorMessages.menuAddedSuccess),
             backgroundColor: AppColors.success,
           ),
         );
@@ -158,7 +159,7 @@ class _AddMenuPageState extends State<AddMenuPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Fotoğraf seçilirken hata oluştu: $e'),
+            content: Text('${ErrorMessages.photoSelectErrorPrefix} $e'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -185,7 +186,7 @@ class _AddMenuPageState extends State<AddMenuPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Fotoğraf çekilirken hata oluştu: $e'),
+            content: Text('${ErrorMessages.photoCaptureErrorPrefix} $e'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -209,19 +210,19 @@ class _AddMenuPageState extends State<AddMenuPage> {
                     children: [
                       Icon(Icons.info_outline, color: AppColors.info),
                       SizedBox(width: 8),
-                      Text(
-                        'Restoran Seçimi Gerekli',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                          Text(
+                            ErrorMessages.restaurantSelectionRequired,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                     ],
                   ),
                   SizedBox(height: 12),
-                  Text(
-                    'Menü eklemek için önce hangi restorana ait olduğunu belirtmeniz gerekiyor.',
-                  ),
+                      Text(
+                        ErrorMessages.restaurantSelectionDesc,
+                      ),
                 ],
               ),
             ),
@@ -235,7 +236,7 @@ class _AddMenuPageState extends State<AddMenuPage> {
               }
             },
             icon: const Icon(Icons.search),
-            label: const Text('Restoran Ara ve Seç'),
+            label: Text(ErrorMessages.restaurantSearchLabel),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
@@ -251,7 +252,7 @@ class _AddMenuPageState extends State<AddMenuPage> {
               }
             },
             icon: const Icon(Icons.add),
-            label: const Text('Yeni Restoran Oluştur'),
+            label: Text(ErrorMessages.newRestaurantLabel),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
@@ -267,7 +268,7 @@ class _AddMenuPageState extends State<AddMenuPage> {
     if (widget.restaurantId == null || widget.restaurantId!.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Restoran Seç'),
+          title: const Text(ErrorMessages.restaurantSelectTitle),
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
         ),
@@ -277,7 +278,7 @@ class _AddMenuPageState extends State<AddMenuPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Menü Ekle'),
+        title: const Text(ErrorMessages.menuAddTitle),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
@@ -298,7 +299,7 @@ class _AddMenuPageState extends State<AddMenuPage> {
                     color: AppColors.info.withValues(alpha: 0.3),
                   ),
                 ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -306,8 +307,8 @@ class _AddMenuPageState extends State<AddMenuPage> {
                         Icon(Icons.info_outline, color: AppColors.info),
                         SizedBox(width: 8),
                         Text(
-                          'Menü Yükleme',
-                          style: TextStyle(
+                          ErrorMessages.menuUploadTitle,
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -316,10 +317,8 @@ class _AddMenuPageState extends State<AddMenuPage> {
                     ),
                     SizedBox(height: 12),
                     Text(
-                      '1. Menü fotoğrafını galeriden seçin, kamera ile çekin veya URL girin\n'
-                      '2. Sistem otomatik olarak menü öğelerini tanıyacak\n'
-                      '3. Tanınan öğeleri kontrol edip düzenleyebilirsiniz',
-                      style: TextStyle(fontSize: 13),
+                      ErrorMessages.menuUploadInstructions,
+                      style: const TextStyle(fontSize: 13),
                     ),
                   ],
                 ),
@@ -329,9 +328,9 @@ class _AddMenuPageState extends State<AddMenuPage> {
 
               // Upload Method Selection
               const Text(
-                'Yükleme Yöntemi',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+                  ErrorMessages.uploadMethodLabel,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               const SizedBox(height: 12),
 
               Row(
@@ -374,9 +373,9 @@ class _AddMenuPageState extends State<AddMenuPage> {
               const SizedBox(height: 24),
 
               // Image Preview or URL Input
-              if (_selectedImage != null) ...[
+                if (_selectedImage != null) ...[
                 const Text(
-                  'Seçilen Fotoğraf',
+                  ErrorMessages.selectedPhotoLabel,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
@@ -433,24 +432,24 @@ class _AddMenuPageState extends State<AddMenuPage> {
                 ),
               ] else if (_uploadMethod == 'url') ...[
                 const Text(
-                  'Menü Fotoğrafı URL\'si',
+                  ErrorMessages.menuPhotoUrlLabel,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _urlController,
                   decoration: const InputDecoration(
-                    hintText: 'https://example.com/menu.jpg',
+                    hintText: ErrorMessages.urlHint,
                     prefixIcon: Icon(Icons.link),
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Lütfen URL girin';
+                      return ErrorMessages.urlRequired;
                     }
                     if (!value.startsWith('http://') &&
                         !value.startsWith('https://')) {
-                      return 'Geçerli bir URL girin (http:// veya https://)';
+                      return ErrorMessages.urlInvalid;
                     }
                     return null;
                   },
@@ -458,7 +457,7 @@ class _AddMenuPageState extends State<AddMenuPage> {
                 ),
               ] else if (widget.qrContent != null && _uploadMethod == 'qr') ...[
                 const Text(
-                  'QR Kod İçeriği',
+                  ErrorMessages.qrContentLabel,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
@@ -501,7 +500,7 @@ class _AddMenuPageState extends State<AddMenuPage> {
                         ),
                       )
                     : const Text(
-                        'Menüyü Yükle ve İşle',
+                        ErrorMessages.uploadAndProcess,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

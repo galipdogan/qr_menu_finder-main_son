@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/custom_button.dart';
@@ -34,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Giriş Yap'),
+        title: const Text(ErrorMessages.login),
         backgroundColor: ThemeProvider.primary(context),
         foregroundColor: ThemeProvider.onPrimary(context),
       ),
@@ -137,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   // Login button
                   CustomButton(
-                    text: 'Giriş Yap',
+                    text: ErrorMessages.login,
                     isLoading: state is AuthLoading,
                     onPressed: state is AuthLoading ? null : _handleLogin,
                   ),

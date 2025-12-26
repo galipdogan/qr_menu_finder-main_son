@@ -7,6 +7,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
 import '../../../restaurant/domain/entities/restaurant.dart';
 import '../../../restaurant/presentation/blocs/restaurant_bloc.dart';
@@ -29,14 +30,14 @@ class FavoritesPage extends StatelessWidget {
     if (userId == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Favorilerim'),
+          title: const Text(ErrorMessages.favoritesTitle),
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
         ),
         body: const EmptyState(
           icon: Icons.error_outline,
-          title: 'Giriş Yapmalısınız',
-          subtitle: 'Favorilerinizi görmek için lütfen giriş yapın.',
+          title: ErrorMessages.mustLogin,
+          subtitle: ErrorMessages.mustLoginForFavorites,
         ),
       );
     }
@@ -57,8 +58,8 @@ class FavoritesPage extends StatelessWidget {
               SnackBar(
                 content: Text(
                   state.isFavorited
-                      ? 'Favorilere eklendi'
-                      : 'Favorilerden çıkarıldı',
+                      ? ErrorMessages.favoriteAdded
+                      : ErrorMessages.favoriteRemoved,
                 ),
                 backgroundColor: AppColors.success,
                 duration: const Duration(seconds: 2),
@@ -102,20 +103,19 @@ class FavoritesPage extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, FavoritesState state, String userId) {
-    if (state is FavoritesLoading || state is FavoriteToggling) {
-      return const LoadingIndicator(message: 'Favoriler yükleniyor...');
+          if (state is FavoritesLoading || state is FavoriteToggling) {
+      return LoadingIndicator(message: ErrorMessages.favoritesLoading);
     }
 
     if (state is FavoritesLoaded) {
       if (state.favorites.isEmpty) {
         return EmptyState(
           icon: Icons.favorite_border,
-          title: 'Henüz Favori Yok',
-          subtitle:
-              'Beğendiğiniz restoranları favorilere ekleyerek buradan kolayca ulaşabilirsiniz',
+          title: ErrorMessages.favoritesEmptyTitle,
+          subtitle: ErrorMessages.favoritesEmptySubtitle,
           action: ElevatedButton(
             onPressed: () => AppNavigation.goHome(context),
-            child: const Text('Restoranları Keşfet'),
+            child: const Text(ErrorMessages.exploreRestaurants),
           ),
         );
       }
@@ -144,12 +144,11 @@ class FavoritesPage extends StatelessWidget {
     // Default/Error state
     return EmptyState(
       icon: Icons.favorite_border,
-      title: 'Henüz Favori Yok',
-      subtitle:
-          'Beğendiğiniz restoranları favorilere ekleyerek buradan kolayca ulaşabilirsiniz',
+      title: ErrorMessages.favoritesEmptyTitle,
+      subtitle: ErrorMessages.favoritesEmptySubtitle,
       action: ElevatedButton(
         onPressed: () => AppNavigation.goHome(context),
-        child: const Text('Restoranları Keşfet'),
+        child: const Text(ErrorMessages.exploreRestaurants),
       ),
     );
   }
@@ -273,7 +272,7 @@ class _FavoriteRestaurantsListState extends State<_FavoriteRestaurantsList> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadRestaurants,
-                child: const Text('Tekrar Dene'),
+                child: const Text(ErrorMessages.tryAgain),
               ),
             ],
           ),
@@ -289,12 +288,11 @@ class _FavoriteRestaurantsListState extends State<_FavoriteRestaurantsList> {
     if (restaurants.isEmpty) {
       return EmptyState(
         icon: Icons.favorite_border,
-        title: 'Henüz Favori Yok',
-        subtitle:
-            'Beğendiğiniz restoranları favorilere ekleyerek buradan kolayca ulaşabilirsiniz',
+        title: ErrorMessages.favoritesEmptyTitle,
+        subtitle: ErrorMessages.favoritesEmptySubtitle,
         action: ElevatedButton(
           onPressed: () => AppNavigation.goHome(context),
-          child: const Text('Restoranları Keşfet'),
+          child: const Text(ErrorMessages.exploreRestaurants),
         ),
       );
     }

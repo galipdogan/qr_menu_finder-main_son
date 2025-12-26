@@ -1,126 +1,65 @@
-import '../../../../core/cache/cache_manager.dart';
-import '../../../../core/error/error.dart';
-import '../models/restaurant_model.dart';
+import 'package:qr_menu_finder/core/cache/cache_manager.dart';
+import 'package:qr_menu_finder/features/restaurant/data/models/restaurant_model.dart';
 
-/// Abstract restaurant local data source
 abstract class RestaurantLocalDataSource {
-  /// Get cached nearby restaurants
-  Future<List<RestaurantModel>> getCachedNearbyRestaurants({
-    required double latitude,
-    required double longitude,
-    int radiusMeters = 5000,
-  });
-  
-  /// Cache nearby restaurants
-  Future<void> cacheNearbyRestaurants({
-    required double latitude,
-    required double longitude,
-    required List<RestaurantModel> restaurants,
-    int radiusMeters = 5000,
-  });
-  
-  /// Get cached restaurant by ID
-  Future<RestaurantModel?> getCachedRestaurant(String id);
-  
-  /// Cache restaurant
+  Future<RestaurantModel?> getRestaurantById(String id);
   Future<void> cacheRestaurant(RestaurantModel restaurant);
-  
-  /// Clear restaurant cache
-  Future<void> clearRestaurantCache();
+  Future<List<RestaurantModel>?> getNearbyRestaurants(
+      double latitude, double longitude);
+  Future<void> cacheNearbyRestaurants(
+      List<RestaurantModel> restaurants, double latitude, double longitude);
 }
 
-/// Cache implementation of restaurant local data source
 class RestaurantLocalDataSourceImpl implements RestaurantLocalDataSource {
-  final CacheManager cacheManager;
+  final CacheManager<Map<String, dynamic>> _cacheManager;
 
-  RestaurantLocalDataSourceImpl({required this.cacheManager});
+  RestaurantLocalDataSourceImpl(this._cacheManager);
 
-  @override
-  Future<List<RestaurantModel>> getCachedNearbyRestaurants({
-    required double latitude,
-    required double longitude,
-    int radiusMeters = 5000,
-  }) async {
-    try {
-      final key = 'nearby_restaurants_${latitude}_${longitude}_$radiusMeters';
-      final cachedData = cacheManager.getCachedData<List<dynamic>>(key);
-      
-      if (cachedData == null) {
-        throw const CacheException('No cached nearby restaurants');
-      }
-      
-      return cachedData
-          .map((json) => RestaurantModel.fromFirestore(
-                // This would need proper DocumentSnapshot mock
-                // For now, we'll throw an exception
-                throw const CacheException('Cache implementation needs DocumentSnapshot mock'),
-              ))
-          .toList();
-    } catch (e) {
-      throw CacheException('Failed to get cached nearby restaurants: ${e.toString()}');
-    }
-  }
+  static const _restaurantKeyPrefix = 'restaurant_';
+  static const _nearbyRestaurantsKeyPrefix = 'nearby_restaurants_';
+  static final _ttl = const Duration(minutes: 30);
 
-  @override
-  Future<void> cacheNearbyRestaurants({
-    required double latitude,
-    required double longitude,
-    required List<RestaurantModel> restaurants,
-    int radiusMeters = 5000,
-  }) async {
-    try {
-      final key = 'nearby_restaurants_${latitude}_${longitude}_$radiusMeters';
-      final data = restaurants.map((r) => r.toFirestore()).toList();
-      
-      await cacheManager.cacheData(
-        key: key,
-        data: data,
-        ttl: const Duration(minutes: 15), // Short TTL for location-based data
-      );
-    } catch (e) {
-      throw CacheException('Failed to cache nearby restaurants: ${e.toString()}');
-    }
-  }
-
-  @override
-  Future<RestaurantModel?> getCachedRestaurant(String id) async {
-    try {
-      final key = 'restaurant_$id';
-      final cachedData = cacheManager.getCachedData<Map<String, dynamic>>(key);
-      
-      if (cachedData == null) {
-        return null;
-      }
-      
-      // This would need proper DocumentSnapshot mock
-      // For now, return null
-      return null;
-    } catch (e) {
-      throw CacheException('Failed to get cached restaurant: ${e.toString()}');
-    }
-  }
+  String _getRestaurantKey(String id) => '$_restaurantKeyPrefix$id';
+  String _getNearbyRestaurantsKey(double lat, double lon) =>
+      '$_nearbyRestaurantsKeyPrefix${lat.toStringAsFixed(4)}_${lon.toStringAsFixed(4)}';
 
   @override
   Future<void> cacheRestaurant(RestaurantModel restaurant) async {
-    try {
-      final key = 'restaurant_${restaurant.id}';
-      await cacheManager.cacheData(
-        key: key,
-        data: restaurant.toFirestore(),
-        ttl: const Duration(hours: 2), // Longer TTL for individual restaurants
-      );
-    } catch (e) {
-      throw CacheException('Failed to cache restaurant: ${e.toString()}');
-    }
+    await _cacheManager.set(
+      _getRestaurantKey(restaurant.id),
+      restaurant.toJson(),
+      ttl: _ttl,
+    );
   }
 
   @override
-  Future<void> clearRestaurantCache() async {
-    try {
-      // This would clear all restaurant-related cache
-      // Implementation would depend on cache key patterns
-    } catch (e) {
-      throw CacheException('Failed to clear restaurant cache: ${e.toString()}');
+  Future<RestaurantModel?> getRestaurantById(String id) async {
+    final json = await _cacheManager.get(_getRestaurantKey(id));
+    if (json != null) {
+      return RestaurantModel.fromJson(json);
     }
+    return null;
+  }
+
+  @override
+  Future<void> cacheNearbyRestaurants(List<RestaurantModel> restaurants,
+      double latitude, double longitude) async {
+    final key = _getNearbyRestaurantsKey(latitude, longitude);
+    final data = {
+      'restaurants': restaurants.map((r) => r.toJson()).toList(),
+    };
+    await _cacheManager.set(key, data, ttl: _ttl);
+  }
+
+  @override
+  Future<List<RestaurantModel>?> getNearbyRestaurants(
+      double latitude, double longitude) async {
+    final key = _getNearbyRestaurantsKey(latitude, longitude);
+    final data = await _cacheManager.get(key);
+    if (data != null && data['restaurants'] is List) {
+      final list = data['restaurants'] as List;
+      return list.map((json) => RestaurantModel.fromJson(json)).toList();
+    }
+    return null;
   }
 }

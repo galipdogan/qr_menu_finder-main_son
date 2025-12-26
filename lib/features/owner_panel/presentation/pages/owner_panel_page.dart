@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../../auth/presentation/blocs/auth_state.dart';
@@ -23,7 +24,7 @@ class OwnerPanelPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('İşletme Paneli'),
+        title: const Text(ErrorMessages.ownerPanelTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline),
@@ -60,19 +61,19 @@ class OwnerPanelPage extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red[300],
-                      ),
-                      const SizedBox(height: 16),
-                      Text('Hata: ${ownerState.message}'),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => _loadStats(context, user.id),
-                        child: const Text('Tekrar Dene'),
-                      ),
-                    ],
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.red[300],
+                          ),
+                          const SizedBox(height: 16),
+                          Text('${ErrorMessages.errorPrefix} ${ownerState.message}'),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => _loadStats(context, user.id),
+                            child: const Text(ErrorMessages.tryAgain),
+                          ),
+                        ],
                   ),
                 );
               }
@@ -98,18 +99,18 @@ class OwnerPanelPage extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => const AddRestaurantPage()),
                 );
 
-                if (result == true && context.mounted) {
-                  // Restoran başarıyla eklendi, sayfayı yenile
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Restoran başarıyla eklendi!'),
-                      backgroundColor: AppColors.success,
-                    ),
-                  );
-                }
+                  if (result == true && context.mounted) {
+                    // Restoran başarıyla eklendi, sayfayı yenile
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(ErrorMessages.addRestaurantSuccess),
+                        backgroundColor: AppColors.success,
+                      ),
+                    );
+                  }
               },
               icon: const Icon(Icons.add),
-              label: const Text('Restoran Ekle'),
+              label: const Text(ErrorMessages.addRestaurant),
               backgroundColor: AppColors.primary,
             );
           }
@@ -123,27 +124,27 @@ class OwnerPanelPage extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Column(
+            child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.lock_outline, size: 80, color: Colors.grey[400]),
             const SizedBox(height: 24),
-            const Text(
-              'Giriş Gerekli',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+                const Text(
+                  ErrorMessages.loginRequired,
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
             const SizedBox(height: 8),
-            Text(
-              'İşletme paneline erişmek için lütfen giriş yapın',
+                Text(
+                  ErrorMessages.ownerPanelLoginPrompt,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.login),
-              label: const Text('Giriş Yap'),
-            ),
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.login),
+                  label: const Text(ErrorMessages.login),
+                ),
           ],
         ),
       ),
@@ -159,13 +160,13 @@ class OwnerPanelPage extends StatelessWidget {
           Icon(Icons.store, size: 100, color: AppColors.primary),
           const SizedBox(height: 32),
           const Text(
-            'İşletme Hesabına Yükselt',
+            ErrorMessages.ownerUpgradeTitle,
             style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           Text(
-            'Restoranınızı platforma ekleyin ve menülerinizi kolayca yönetin',
+            ErrorMessages.ownerUpgradeSubtitle,
             style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
@@ -174,29 +175,29 @@ class OwnerPanelPage extends StatelessWidget {
           // Özellikler
           _buildFeatureCard(
             icon: Icons.restaurant_menu,
-            title: 'Menü Yönetimi',
-            description: 'QR kod ile menülerinizi kolayca güncelleyin',
+            title: ErrorMessages.ownerFeatureMenuManagement,
+            description: ErrorMessages.ownerFeatureMenuManagementDesc,
             color: Colors.blue,
           ),
           const SizedBox(height: 16),
           _buildFeatureCard(
             icon: Icons.analytics,
-            title: 'İstatistikler',
-            description: 'Restoranınızın performansını takip edin',
+            title: ErrorMessages.ownerFeatureStats,
+            description: ErrorMessages.ownerFeatureStatsDesc,
             color: Colors.green,
           ),
           const SizedBox(height: 16),
           _buildFeatureCard(
             icon: Icons.people,
-            title: 'Müşteri Yorumları',
-            description: 'Müşteri geri bildirimlerini görün ve yanıtlayın',
+            title: ErrorMessages.ownerFeatureReviews,
+            description: ErrorMessages.ownerFeatureReviewsDesc,
             color: Colors.orange,
           ),
           const SizedBox(height: 16),
           _buildFeatureCard(
             icon: Icons.notifications_active,
-            title: 'Anlık Bildirimler',
-            description: 'Yeni yorumlar ve güncellemelerden haberdar olun',
+            title: ErrorMessages.ownerFeatureNotifications,
+            description: ErrorMessages.ownerFeatureNotificationsDesc,
             color: Colors.purple,
           ),
 
@@ -212,7 +213,7 @@ class OwnerPanelPage extends StatelessWidget {
               },
               icon: const Icon(Icons.arrow_forward, size: 24),
               label: const Text(
-                'İşletme Hesabı Başvurusu Yap',
+                ErrorMessages.ownerApplyButton,
                 style: TextStyle(fontSize: 18),
               ),
             ),
@@ -224,7 +225,7 @@ class OwnerPanelPage extends StatelessWidget {
             onPressed: () {
               _showHelpDialog(context);
             },
-            child: const Text('Daha fazla bilgi'),
+            child: const Text(ErrorMessages.ownerMoreInfo),
           ),
 
           const SizedBox(height: 40),
@@ -260,7 +261,7 @@ class OwnerPanelPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hoş geldiniz,',
+                  ErrorMessages.welcomePrefix,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 16,
@@ -291,7 +292,7 @@ class OwnerPanelPage extends StatelessWidget {
                     Expanded(
                       child: _buildStatCard(
                         icon: Icons.restaurant,
-                        title: 'Restoranlarım',
+                        title: ErrorMessages.myRestaurants,
                         value: restaurantCount.toString(),
                         color: Colors.blue,
                       ),
@@ -300,7 +301,7 @@ class OwnerPanelPage extends StatelessWidget {
                     Expanded(
                       child: _buildStatCard(
                         icon: Icons.menu_book,
-                        title: 'Menü Ürünleri',
+                        title: ErrorMessages.menuProducts,
                         value: menuCount.toString(),
                         color: Colors.green,
                       ),
@@ -316,7 +317,7 @@ class OwnerPanelPage extends StatelessWidget {
                     Expanded(
                       child: _buildStatCard(
                         icon: Icons.rate_review,
-                        title: 'Yorumlar',
+                        title: ErrorMessages.reviewsLabel,
                         value: reviewCount.toString(),
                         color: Colors.orange,
                       ),
@@ -325,8 +326,8 @@ class OwnerPanelPage extends StatelessWidget {
                     Expanded(
                       child: _buildStatCard(
                         icon: Icons.visibility,
-                        title: 'Görüntülenme',
-                        value: viewCount > 0 ? viewCount.toString() : 'Yakında',
+                        title: ErrorMessages.viewsLabel,
+                        value: viewCount > 0 ? viewCount.toString() : ErrorMessages.comingSoon,
                         color: Colors.purple,
                       ),
                     ),
@@ -342,7 +343,7 @@ class OwnerPanelPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'Hızlı İşlemler',
+              ErrorMessages.quickActions,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -366,29 +367,29 @@ class OwnerPanelPage extends StatelessWidget {
                 _buildQuickActionCard(
                   context,
                   icon: Icons.add_business,
-                  title: 'Restoran Ekle',
+                  title: ErrorMessages.addRestaurant,
                   color: Colors.blue,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Restoran ekleme yakında!')),
+                      const SnackBar(content: Text(ErrorMessages.addRestaurant)),
                     );
                   },
                 ),
                 _buildQuickActionCard(
                   context,
                   icon: Icons.qr_code_scanner,
-                  title: 'Menü Tara',
+                  title: ErrorMessages.ownerActionMenuScan,
                   color: Colors.green,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('QR tarama yakında!')),
+                      const SnackBar(content: Text(ErrorMessages.qrScanComingSoon)),
                     );
                   },
                 ),
                 _buildQuickActionCard(
                   context,
                   icon: Icons.verified,
-                  title: 'OCR Doğrula',
+                  title: ErrorMessages.ownerActionOcrVerify,
                   color: Colors.orange,
                   onTap: () async {
                     final authState = context.read<AuthBloc>().state;
@@ -404,11 +405,11 @@ class OwnerPanelPage extends StatelessWidget {
                 _buildQuickActionCard(
                   context,
                   icon: Icons.analytics,
-                  title: 'Raporlar',
+                  title: ErrorMessages.ownerActionReports,
                   color: Colors.purple,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Raporlar yakında!')),
+                      const SnackBar(content: Text(ErrorMessages.reportsComingSoon)),
                     );
                   },
                 ),
@@ -422,7 +423,7 @@ class OwnerPanelPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'Son Aktiviteler',
+              ErrorMessages.recentActivities,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -447,12 +448,12 @@ class OwnerPanelPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Henüz aktivite yok',
+                      ErrorMessages.ownerNoActivity,
                       style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Restoran eklediğinizde burada görünecek',
+                      ErrorMessages.comingSoon,
                       style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                       textAlign: TextAlign.center,
                     ),
@@ -580,53 +581,37 @@ class OwnerPanelPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('İşletme Hesabı Başvurusu'),
-          content: const Text(
-            'İşletme hesabı başvurusu özelliği yakında aktif olacak.\n\n'
-            'Restoran bilgilerinizi ve belgelerinizi yükleyerek '
-            'işletme hesabına geçiş yapabileceksiniz.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Tamam'),
-            ),
-          ],
-        );
+            return AlertDialog(
+              title: const Text(ErrorMessages.ownerApplicationTitle),
+              content: const Text(ErrorMessages.ownerApplicationContent),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text(ErrorMessages.understood),
+                ),
+              ],
+            );
       },
     );
   }
 
-  void _showHelpDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('İşletme Paneli Hakkında'),
-          content: const SingleChildScrollView(
-            child: Text(
-              'İşletme Paneli ile neler yapabilirsiniz?\n\n'
-              '• Restoranlarınızı ekleyin ve yönetin\n'
-              '• Menülerinizi QR kod ile güncelleyin\n'
-              '• Müşteri yorumlarını görün\n'
-              '• Fiyat geçmişini takip edin\n'
-              '• İstatistikleri izleyin\n\n'
-              'İşletme hesabı oluşturmak için:\n'
-              '1. İşletme belgelerinizi hazırlayın\n'
-              '2. Başvuru yapın\n'
-              '3. Onay bekleyin (24-48 saat)\n'
-              '4. Onaylandıktan sonra panel aktif olur',
-            ),
+void _showHelpDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        title: const Text(ErrorMessages.ownerPanelAboutTitle),
+        content: const SingleChildScrollView(
+          child: Text(ErrorMessages.ownerPanelAboutContent),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text(ErrorMessages.understood),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Anladım'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ],
+      );
+    },
+  );
+}
 }

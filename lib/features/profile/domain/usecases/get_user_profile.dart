@@ -2,17 +2,17 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../entities/user_profile.dart';
+import '../../../auth/domain/entities/user.dart';
 import '../repositories/profile_repository.dart';
 
 /// Use case for getting user profile
-class GetUserProfile implements UseCase<UserProfile, GetUserProfileParams> {
+class GetUserProfile implements UseCase<User, GetUserProfileParams> {
   final ProfileRepository repository;
 
   GetUserProfile(this.repository);
 
   @override
-  Future<Either<Failure, UserProfile>> call(GetUserProfileParams params) async {
+  Future<Either<Failure, User>> call(GetUserProfileParams params) async {
     return await repository.getUserProfile(params.uid);
   }
 }

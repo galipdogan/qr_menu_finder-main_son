@@ -131,28 +131,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     String? photoURL,
   }) async {
     final firebaseUser = _auth.currentUser;
-    if (firebaseUser == null) {
-      throw const AuthException('No user signed in');
-    }
+    if (firebaseUser == null) throw const AuthException('No user signed in');
 
+    // 1. Auth Profilini Güncelle
     if (displayName != null) await firebaseUser.updateDisplayName(displayName);
     if (photoURL != null) await firebaseUser.updatePhotoURL(photoURL);
 
+    // 2. Firestore'u Güncelle
     final updateData = {
       if (displayName != null) 'displayName': displayName,
       if (photoURL != null) 'photoURL': photoURL,
       'updatedAt': FieldValue.serverTimestamp(),
     };
+    await _firestore.collection('users').doc(firebaseUser.uid).update(updateData);
 
-    await _firestore
-        .collection('users')
-        .doc(firebaseUser.uid)
-        .update(updateData);
-
-    // Return fresh mapped model (Auth values + updated Firestore fields)
-    return _mapFirebaseUser(firebaseUser);
+    // 3. firebaseUser.reload() yaparak yerel cache'i temizleyin ve güncel veriyi çekin
+    await firebaseUser.reload();
+    return _fetchUser(_auth.currentUser!); 
   }
-
   @override
   Future<void> deleteAccount() async {
     final firebaseUser = _auth.currentUser;

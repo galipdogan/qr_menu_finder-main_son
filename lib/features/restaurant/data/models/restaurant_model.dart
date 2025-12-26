@@ -74,6 +74,34 @@ class RestaurantModel extends Restaurant {
     this.menuPreview = const [],
   });
 
+  factory RestaurantModel.fromEntity(Restaurant entity) {
+    if (entity is RestaurantModel) {
+      return entity;
+    }
+    return RestaurantModel(
+      id: entity.id,
+      name: entity.name,
+      description: entity.description,
+      address: entity.address,
+      latitude: entity.latitude,
+      longitude: entity.longitude,
+      phoneNumber: entity.phoneNumber,
+      website: entity.website,
+      imageUrls: entity.imageUrls,
+      rating: entity.rating,
+      reviewCount: entity.reviewCount,
+      categories: entity.categories,
+      openingHours: entity.openingHours,
+      isActive: entity.isActive,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      ownerId: entity.ownerId,
+      hasMenu: entity.hasMenu,
+      placeId: entity.id, // Default to ID if missing
+      geohash: '', // Default to empty if missing
+    );
+  }
+
   /// ✅ Create from Firestore document (ID NORMALIZED)
   factory RestaurantModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -120,6 +148,75 @@ class RestaurantModel extends Restaurant {
       menuLinks: List<Map<String, dynamic>>.from(data['menuLinks'] ?? []),
       menuPreview: List<Map<String, dynamic>>.from(data['menuPreview'] ?? []),
     );
+  }
+
+  factory RestaurantModel.fromJson(Map<String, dynamic> json) {
+    return RestaurantModel(
+      id: json['id'],
+      name: json['name'],
+      description: json['description'],
+      address: json['address'],
+      latitude: json['latitude'],
+      longitude: json['longitude'],
+      phoneNumber: json['phoneNumber'],
+      website: json['website'],
+      imageUrls: List<String>.from(json['imageUrls'] ?? []),
+      rating: (json['rating'] as num?)?.toDouble(),
+      reviewCount: json['reviewCount'],
+      categories: List<String>.from(json['categories'] ?? []),
+      openingHours: Map<String, String>.from(json['openingHours'] ?? {}),
+      isActive: json['isActive'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt:
+          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      ownerId: json['ownerId'],
+      hasMenu: json['hasMenu'],
+      placeId: json['placeId'],
+      geohash: json['geohash'],
+      lastSyncedAt: json['lastSyncedAt'] != null
+          ? DateTime.parse(json['lastSyncedAt'])
+          : null,
+      city: json['city'],
+      district: json['district'],
+      contributedBy: json['contributedBy'],
+      isFromGooglePlaces: json['isFromGooglePlaces'],
+      itemCount: json['itemCount'],
+      menuLinks: List<Map<String, dynamic>>.from(json['menuLinks'] ?? []),
+      menuPreview: List<Map<String, dynamic>>.from(json['menuPreview'] ?? []),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+      'phoneNumber': phoneNumber,
+      'website': website,
+      'imageUrls': imageUrls,
+      'rating': rating,
+      'reviewCount': reviewCount,
+      'categories': categories,
+      'openingHours': openingHours,
+      'isActive': isActive,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'ownerId': ownerId,
+      'hasMenu': hasMenu,
+      'placeId': placeId,
+      'geohash': geohash,
+      'lastSyncedAt': lastSyncedAt?.toIso8601String(),
+      'city': city,
+      'district': district,
+      'contributedBy': contributedBy,
+      'isFromGooglePlaces': isFromGooglePlaces,
+      'itemCount': itemCount,
+      'menuLinks': menuLinks,
+      'menuPreview': menuPreview,
+    };
   }
 
   /// Convert to Firestore document

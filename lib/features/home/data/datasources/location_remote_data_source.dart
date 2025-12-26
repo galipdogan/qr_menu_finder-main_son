@@ -1,17 +1,15 @@
 import 'dart:async';
 import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
 
-import 'package:geolocator/geolocator.dart'; // Add geolocator import
-import '../../../../core/utils/app_logger.dart'; // Add this import
-
-import '../../../maps/data/datasources/nominatim_remote_data_source.dart'; // Updated import
-import '../../../maps/data/datasources/turkey_location_remote_data_source.dart'; // New import
-import '../../../maps/data/datasources/photon_remote_data_source.dart'; // New import
-import '../../../restaurant/data/datasources/restaurant_remote_data_source.dart'; // New import
-import '../../../../core/models/place_result.dart'; // New import
+import '../../../../core/maps/data/datasources/photon_remote_data_source.dart';
+import '../../../../core/utils/app_logger.dart';
+import '../../../../core/services/nominatim_service.dart';
+import '../../../../core/models/nominatim_place.dart';
+import '../../../../core/models/place_result.dart';
+import '../../../restaurant/data/datasources/restaurant_remote_data_source.dart';
 import '../../domain/entities/location.dart';
 import '../models/location_model.dart';
-
 import '../../domain/entities/place_suggestion.dart';
 import '../../domain/entities/turkey_location.dart';
 
@@ -28,14 +26,14 @@ abstract class LocationRemoteDataSource {
 }
 
 class LocationRemoteDataSourceImpl implements LocationRemoteDataSource {
-  final NominatimRemoteDataSource nominatimRemoteDataSource; // Correct
-  final TurkeyLocationRemoteDataSource turkeyLocationRemoteDataSource;
+  final NominatimService nominatimService;
+  //final TurkeyLocationRemoteDataSource turkeyLocationRemoteDataSource;
   final PhotonRemoteDataSource photonRemoteDataSource; // New dependency
   final RestaurantRemoteDataSource restaurantRemoteDataSource; // New dependency
 
   LocationRemoteDataSourceImpl({
-    required this.nominatimRemoteDataSource, // Correct
-    required this.turkeyLocationRemoteDataSource, // Correct
+    required this.nominatimService,
+    //required this.turkeyLocationRemoteDataSource, // Correct
     required this.photonRemoteDataSource, // Correct
     required this.restaurantRemoteDataSource, // Correct
   });
@@ -74,32 +72,20 @@ class LocationRemoteDataSourceImpl implements LocationRemoteDataSource {
       longitude: position.longitude,
     );
   }
+  
+  @override
+  Future<String> getLocationName(Location location) {
+    // TODO: implement getLocationName
+    throw UnimplementedError();
+  }
 
   @override
-  Future<String> getLocationName(Location location) async {
-    final place = await nominatimRemoteDataSource.reverseGeocode(
-      // Updated usage
-      LatLng(location.latitude, location.longitude),
-    );
-
-    if (place != null) {
-      // Extract city/district from full address
-      final parts = place.displayName.split(',');
-      String shortAddress = 'Mevcut konumunuz';
-
-      if (parts.length >= 2) {
-        // Get last 2-3 parts (usually district, city, country)
-        final relevantParts = parts.reversed.take(3).toList().reversed;
-        shortAddress = relevantParts.join(', ').trim();
-      } else if (parts.isNotEmpty) {
-        shortAddress = parts.first.trim();
-      }
-
-      return shortAddress;
-    }
-
-    return 'Mevcut konumunuz';
+  Future<List<TurkeyLocation>> getTurkeyLocations() async {
+    // TODO: Implement Turkey locations
+    // For now, return empty list
+    return [];
   }
+
 
   @override
   Future<List<PlaceSuggestion>> searchPlaces({
@@ -130,13 +116,13 @@ class LocationRemoteDataSourceImpl implements LocationRemoteDataSource {
 
     try {
       // 2. Fallback to Nominatim API (more comprehensive)
-      final nominatimResults = await nominatimRemoteDataSource.searchPlaces(
-        query,
+      final nominatimResults = await nominatimService.searchByText(
+        query: query,
         latitude: latitude,
         longitude: longitude,
         limit: limit - allResults.length,
       );
-      allResults.addAll(nominatimResults);
+      allResults.addAll(nominatimResults.map(_nominatimToPlaceResult));
       if (allResults.length >= limit) {
         return allResults.take(limit).map(_toPlaceSuggestion).toList();
       }
@@ -173,25 +159,36 @@ class LocationRemoteDataSourceImpl implements LocationRemoteDataSource {
     );
   }
 
-  @override
-  Future<List<TurkeyLocation>> getTurkeyLocations() async {
-    final cities = turkeyLocationRemoteDataSource.getMajorCities();
-    final List<TurkeyLocation> allLocations = [];
-
-    for (final city in cities) {
-      final coords = turkeyLocationRemoteDataSource.getCityCoordinates(city);
-      allLocations.add(
-        TurkeyLocation(
-          id: 'city_${city.toLowerCase()}',
-          name: city,
-          type: 'city',
-          latitude: coords?['lat'] ?? 0.0,
-          longitude: coords?['lng'] ?? 0.0,
-        ),
-      );
-      // Optionally fetch districts and neighborhoods if needed for full hierarchy
-      // For now, just add cities to avoid excessive API calls
-    }
-    return allLocations;
+  PlaceResult _nominatimToPlaceResult(NominatimPlace place) {
+    return PlaceResult(
+      placeId: place.placeId.toString(),
+      name: place.displayName.split(',').first.trim(),
+      displayName: place.displayName,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      type: place.type ?? 'place',
+    );
   }
+
+  // @override
+  // Future<List<TurkeyLocation>> getTurkeyLocations() async {
+  //   final cities = turkeyLocationRemoteDataSource.getMajorCities();
+  //   final List<TurkeyLocation> allLocations = [];
+
+  //   for (final city in cities) {
+  //     final coords = turkeyLocationRemoteDataSource.getCityCoordinates(city);
+  //     allLocations.add(
+  //       TurkeyLocation(
+  //         id: 'city_${city.toLowerCase()}',
+  //         name: city,
+  //         type: 'city',
+  //         latitude: coords?['lat'] ?? 0.0,
+  //         longitude: coords?['lng'] ?? 0.0,
+  //       ),
+  //     );
+  //     // Optionally fetch districts and neighborhoods if needed for full hierarchy
+  //     // For now, just add cities to avoid excessive API calls
+  //   }
+  //   return allLocations;
+  // }
 }

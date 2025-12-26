@@ -1,3 +1,4 @@
+import 'package:qr_menu_finder/core/utils/app_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 
@@ -22,7 +23,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       await sharedPreferences.setString(cachedUserKey, user.toJsonString());
     } catch (e) {
       // Burada loglama yapabilirsin
-      print('Failed to cache user: $e');
+      AppLogger.e('Failed to cache user: $e');
     }
   }
 
@@ -34,7 +35,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
         return UserModel.fromJsonString(jsonString);
       }
     } catch (e) {
-      print('Failed to get cached user: $e');
+      AppLogger.e('Failed to get cached user: $e');
     }
     return null;
   }

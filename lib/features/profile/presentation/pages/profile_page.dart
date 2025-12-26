@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../routing/route_names.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
@@ -9,7 +10,6 @@ import '../../../auth/domain/entities/user.dart';
 import '../../../auth/presentation/blocs/auth_event.dart';
 import '../../../auth/presentation/blocs/auth_state.dart';
 import '../../../review/presentation/blocs/review_bloc.dart';
-import '../../../review/presentation/pages/comments_page.dart';
 
 /// Profil ekranı - Sadece normal kullanıcılar için
 class ProfilePage extends StatefulWidget {
@@ -39,7 +39,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: const Text(ErrorMessages.profileTitle),
         actions: [
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
@@ -59,7 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           if (state is! AuthAuthenticated) {
-            return const Center(child: Text('Lütfen giriş yapın'));
+            return const Center(child: Text(ErrorMessages.mustLogin));
           }
 
           final user = state.user;
@@ -148,7 +148,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: _buildStatCard(
                           context,
                           icon: Icons.favorite,
-                          title: 'Favorilerim',
+                          title: ErrorMessages.favoritesTitle,
                           value: '${user.favorites.length}',
                           color: Colors.red,
                         ),
@@ -168,7 +168,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             return _buildStatCard(
                               context,
                               icon: Icons.rate_review,
-                              title: 'Yorumlarım',
+                              title: ErrorMessages.reviewsTitle,
                               value: commentCount,
                               color: Colors.orange,
                             );
@@ -184,11 +184,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 // Menü Seçenekleri
                 _buildMenuSection(
                   context,
-                  title: 'Hesabım',
+                  title: ErrorMessages.accountSection,
                   items: [
                     _MenuItem(
                       icon: Icons.favorite,
-                      title: 'Favorilerim',
+                      title: ErrorMessages.favoritesTitle,
                       subtitle: '${user.favorites.length} favori',
                       onTap: () {
                         context.push(RouteNames.favorites);
@@ -196,21 +196,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     _MenuItem(
                       icon: Icons.rate_review,
-                      title: 'Yorumlarım',
-                      subtitle: 'Yaptığım yorumlar',
+                      title: ErrorMessages.reviewsTitle,
+                      subtitle: ErrorMessages.myCommentsSubtitle,
                       onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                const CommentsPage(restaurantId: 'temp'),
-                          ),
-                        );
+                        context.push(RouteNames.userReviews);
                       },
                     ),
                     _MenuItem(
                       icon: Icons.history,
-                      title: 'Geçmiş',
-                      subtitle: 'Ziyaret ettiğim yerler',
+                      title: ErrorMessages.historyTitle,
+                      subtitle: ErrorMessages.visitedPlacesSubtitle,
                       onTap: () {
                         context.push(RouteNames.history);
                       },
@@ -222,20 +217,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 _buildMenuSection(
                   context,
-                  title: 'Ayarlar',
+                  title: ErrorMessages.settingsTitle,
                   items: [
                     _MenuItem(
                       icon: Icons.person,
-                      title: 'Profil Bilgileri',
-                      subtitle: 'Ad, e-posta',
+                      title: ErrorMessages.profileInfoTitle,
+                      subtitle: ErrorMessages.profileInfoSubtitle,
                       onTap: () {
                         context.push(RouteNames.editProfile);
                       },
                     ),
                     _MenuItem(
                       icon: Icons.notifications,
-                      title: 'Bildirimler',
-                      subtitle: 'Bildirim tercihleri',
+                      title: ErrorMessages.notificationsTitle,
+                      subtitle: ErrorMessages.notificationsSubtitle,
                       onTap: () {
                         context.push(
                           '${RouteNames.settings}?type=notifications',
@@ -244,8 +239,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     _MenuItem(
                       icon: Icons.language,
-                      title: 'Dil',
-                      subtitle: 'Türkçe',
+                      title: ErrorMessages.languageTitle,
+                      subtitle: ErrorMessages.turkish,
                       onTap: () {
                         context.push('${RouteNames.settings}?type=language');
                       },
@@ -272,7 +267,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             const SizedBox(height: 16),
                             const Text(
-                              'İşletme Hesabı',
+                              ErrorMessages.businessAccountTitle,
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -280,7 +275,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Restoranınızı ekleyin, menülerinizi yönetin',
+                              ErrorMessages.businessAccountSubtitle,
                               textAlign: TextAlign.center,
                               style: TextStyle(color: Colors.grey[700]),
                             ),
@@ -291,14 +286,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
-                                      'İşletme hesabı kaydı yakında aktif olacak!',
+                                      ErrorMessages.businessAccountSoon,
                                     ),
                                     backgroundColor: AppColors.primary,
                                   ),
                                 );
                               },
                               icon: const Icon(Icons.arrow_forward),
-                              label: const Text('İşletme Hesabı Aç'),
+                              label: const Text(ErrorMessages.openBusinessAccount),
                             ),
                           ],
                         ),
@@ -319,9 +314,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       },
                       icon: Icon(Icons.logout, color: AppColors.error),
                       label: const Text(
-                        'Çıkış Yap',
-                        style: TextStyle(color: AppColors.error),
-                      ),
+                          ErrorMessages.logoutTitle,
+                          style: TextStyle(color: AppColors.error),
+                        ),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: AppColors.error),
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -407,13 +402,13 @@ class _ProfilePageState extends State<ProfilePage> {
   String _getRoleName(UserRole role) {
     switch (role) {
       case UserRole.user:
-        return 'Kullanıcı';
+        return ErrorMessages.roleUser;
       case UserRole.owner:
-        return 'İşletme Sahibi';
+        return ErrorMessages.roleOwner;
       case UserRole.admin:
-        return 'Yönetici';
+        return ErrorMessages.roleAdmin;
       case UserRole.pendingOwner:
-        return 'İşletme Başvurusu Bekliyor';
+        return ErrorMessages.rolePendingOwner;
     }
   }
 
@@ -423,15 +418,15 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Çıkış Yap'),
-          content: const Text('Çıkış yapmak istediğinize emin misiniz?'),
+          title: const Text(ErrorMessages.logoutTitle),
+          content: const Text(ErrorMessages.logoutConfirm),
           actions: [
             TextButton(
               onPressed: () {
                 AppLogger.i('❌ ProfilePage: Logout cancelled');
                 Navigator.of(dialogContext).pop();
               },
-              child: const Text('İptal'),
+              child: const Text(ErrorMessages.cancel),
             ),
             ElevatedButton(
               onPressed: () {
@@ -441,7 +436,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.of(context).pop(); // Profil ekranından çık
               },
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-              child: const Text('Çıkış Yap'),
+              child: const Text(ErrorMessages.logoutTitle),
             ),
           ],
         );

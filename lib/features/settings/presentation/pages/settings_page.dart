@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_menu_finder/core/theme/app_colors.dart';
+import '../../../../core/error/error_messages.dart';
 import 'package:qr_menu_finder/features/settings/presentation/blocs/settings_bloc.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/theme/theme_bloc.dart';
@@ -15,13 +16,13 @@ class SettingsPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => sl<SettingsBloc>()..add(LoadSettings()),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Ayarlar')),
+        appBar: AppBar(title: const Text(ErrorMessages.settingsTitle)),
         body: BlocConsumer<SettingsBloc, SettingsState>(
           listener: (context, state) {
             if (state is SettingsFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Hata: ${state.message}'),
+                    content: Text('${ErrorMessages.errorPrefix} ${state.message}'),
                   backgroundColor: AppColors.error,
                 ),
               );
@@ -34,7 +35,7 @@ class SettingsPage extends StatelessWidget {
             if (state is SettingsLoaded) {
               return _buildSettingsList(context, state);
             }
-            return const Center(child: Text('Ayarlar yüklenemedi.'));
+            return const Center(child: Text(ErrorMessages.settingsLoadFailed));
           },
         ),
       ),
@@ -45,7 +46,7 @@ class SettingsPage extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildSectionTitle(context, 'Genel'),
+        _buildSectionTitle(context, ErrorMessages.generalSection),
         _buildNotificationsTile(context, state),
         const Divider(),
         _buildLanguageTile(context, state),
@@ -71,8 +72,8 @@ class SettingsPage extends StatelessWidget {
   Widget _buildNotificationsTile(BuildContext context, SettingsLoaded state) {
     return SwitchListTile(
       secondary: const Icon(Icons.notifications_active),
-      title: const Text('Bildirimler'),
-      subtitle: const Text('Promosyon ve güncellemeler hakkında bildirim al'),
+      title: const Text(ErrorMessages.notificationsTitle),
+      subtitle: const Text(ErrorMessages.notificationsSubtitle),
       value: state.notificationsEnabled,
       onChanged: (value) {
         context.read<SettingsBloc>().add(NotificationsToggled(value));
@@ -83,12 +84,12 @@ class SettingsPage extends StatelessWidget {
   Widget _buildLanguageTile(BuildContext context, SettingsLoaded state) {
     return ListTile(
       leading: const Icon(Icons.language),
-      title: const Text('Dil'),
+      title: const Text(ErrorMessages.languageTitle),
       trailing: DropdownButton<String>(
         value: state.languageCode,
         items: const [
-          DropdownMenuItem(value: 'tr', child: Text('Türkçe')),
-          DropdownMenuItem(value: 'en', child: Text('English')),
+          DropdownMenuItem(value: 'tr', child: Text(ErrorMessages.turkish)),
+          DropdownMenuItem(value: 'en', child: Text(ErrorMessages.english)),
         ],
         onChanged: (value) {
           if (value != null) {
@@ -114,13 +115,13 @@ class SettingsPage extends StatelessWidget {
 
     return ListTile(
       leading: const Icon(Icons.color_lens),
-      title: const Text('Tema'),
+      title: const Text(ErrorMessages.themeTitle),
       trailing: DropdownButton<String>(
         value: state.themeMode,
         items: const [
-          DropdownMenuItem(value: 'system', child: Text('Sistem')),
-          DropdownMenuItem(value: 'light', child: Text('Açık')),
-          DropdownMenuItem(value: 'dark', child: Text('Koyu')),
+          DropdownMenuItem(value: 'system', child: Text(ErrorMessages.system)),
+          DropdownMenuItem(value: 'light', child: Text(ErrorMessages.light)),
+          DropdownMenuItem(value: 'dark', child: Text(ErrorMessages.dark)),
         ],
         onChanged: (value) {
           if (value != null) {
