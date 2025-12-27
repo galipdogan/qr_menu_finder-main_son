@@ -17,6 +17,7 @@ import 'features/auth/presentation/blocs/auth_bloc.dart';
 import 'features/favorites/presentation/blocs/favorites_bloc.dart';
 import 'features/favorites/domain/entities/favorite_item.dart';
 import 'features/home/presentation/blocs/home_bloc.dart';
+import 'features/review/presentation/blocs/review_bloc.dart';
 //import 'features/notifications/presentation/blocs/notification_bloc.dart'; // New import
 import 'package:qr_menu_finder/core/usecases/usecase.dart';
 import 'package:qr_menu_finder/features/analytics/domain/usecases/initialize_analytics.dart'; // New import for Analytics UseCase
@@ -93,6 +94,7 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(create: (context) => di.sl<FavoritesBloc>()),
         BlocProvider(create: (context) => di.sl<HomeBloc>()),
+        BlocProvider(create: (context) => di.sl<ReviewBloc>()),
         // NotificationBloc - only enabled on mobile platforms (iOS/Android)
         if (!kIsWeb)
           BlocProvider(

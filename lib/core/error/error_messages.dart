@@ -373,6 +373,11 @@ class ErrorMessages {
   static const String fileTooLarge = 'Seçilen dosya çok büyük. Daha küçük bir dosya seçin.';
   static const String unsupportedFileType = 'Desteklenmeyen dosya türü. Lütfen farklı bir dosya seçin.';
 
+  // URL/Link errors
+  static const String urlCannotOpen = 'Bu URL açılamıyor. Lütfen geçerli bir link olduğundan emin olun.';
+  static const String urlOpenFailed = 'Link açılamadı. Lütfen tarayıcınızı kontrol edin.';
+  static const String menuLinkOpenFailed = 'Menü linki açılamadı. Lütfen tekrar deneyin.';
+
   /// Firebase hata kodlarını kullanıcı dostu mesajlara çevirir
   static String getFirebaseAuthErrorMessage(String errorCode) {
     switch (errorCode) {

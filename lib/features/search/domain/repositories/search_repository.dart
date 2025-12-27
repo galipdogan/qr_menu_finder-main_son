@@ -5,7 +5,7 @@ import '../entities/search_response.dart';
 
 /// Search repository interface for clean architecture
 abstract class SearchRepository {
-  /// Search for items (restaurants and menu items) using Algolia
+  /// Search for items (restaurants and menu items)
   Future<Either<Failure, SearchResponse>> searchItems(SearchQuery query);
 
   /// Get search suggestions based on partial query

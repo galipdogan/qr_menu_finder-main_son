@@ -9,6 +9,7 @@ class SearchQuery extends Equatable {
   final double? minPrice;
   final double? maxPrice;
   final double? minRating;
+  final bool? hasMenu;  // ✅ Filter for restaurants with menus
   final int page;
   final int hitsPerPage;
 
@@ -20,6 +21,7 @@ class SearchQuery extends Equatable {
     this.minPrice,
     this.maxPrice,
     this.minRating,
+    this.hasMenu,
     this.page = 0,
     this.hitsPerPage = 20,
   });
@@ -32,6 +34,7 @@ class SearchQuery extends Equatable {
     double? minPrice,
     double? maxPrice,
     double? minRating,
+    bool? hasMenu,
     int? page,
     int? hitsPerPage,
   }) {
@@ -43,6 +46,7 @@ class SearchQuery extends Equatable {
       minPrice: minPrice ?? this.minPrice,
       maxPrice: maxPrice ?? this.maxPrice,
       minRating: minRating ?? this.minRating,
+      hasMenu: hasMenu ?? this.hasMenu,
       page: page ?? this.page,
       hitsPerPage: hitsPerPage ?? this.hitsPerPage,
     );
@@ -57,6 +61,7 @@ class SearchQuery extends Equatable {
         minPrice,
         maxPrice,
         minRating,
+        hasMenu,
         page,
         hitsPerPage,
       ];

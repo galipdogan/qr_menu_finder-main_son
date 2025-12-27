@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'route_names.dart';
 import '../features/restaurant/domain/entities/restaurant.dart';
+import '../core/error/error_messages.dart';
 
 /// Type-safe navigation helper sınıfı
 class AppNavigation {
@@ -161,12 +162,29 @@ class AppNavigation {
 
   // Diğer özellikler
 
+
   static Future<void> launchExternalUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      throw Exception("Could not launch $url");
+    try {
+      final uri = Uri.parse(url);
+      
+      // Try to launch the URL
+      final canLaunch = await canLaunchUrl(uri);
+      
+      if (canLaunch) {
+        final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (!launched) {
+          throw Exception(ErrorMessages.urlOpenFailed);
+        }
+      } else {
+        throw Exception(ErrorMessages.urlCannotOpen);
+      }
+    } catch (e) {
+      // Re-throw with more context
+      if (e.toString().contains(ErrorMessages.urlOpenFailed) ||
+          e.toString().contains(ErrorMessages.urlCannotOpen)) {
+        rethrow;
+      }
+      throw Exception('${ErrorMessages.menuLinkOpenFailed} ${e.toString()}');
     }
   }
 

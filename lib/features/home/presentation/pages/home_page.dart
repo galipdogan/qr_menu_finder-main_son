@@ -8,6 +8,7 @@ import '../../../../routing/app_navigation.dart';
 import '../../../../routing/route_names.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
 import '../../../auth/presentation/blocs/auth_event.dart';
+import '../../../restaurant/domain/entities/restaurant.dart';
 import '../../../restaurant/presentation/widgets/restaurant_list_item.dart';
 import '../../domain/entities/location.dart';
 import '../blocs/home_bloc.dart';
@@ -15,10 +16,7 @@ import '../widgets/home_app_bar_actions.dart';
 import '../widgets/modular_search_bar.dart';
 import '../blocs/search/search_bloc.dart';
 import '../../domain/usecases/search_places.dart';
-import '../../domain/usecases/get_turkey_locations.dart';
 import '../../../../injection_container.dart' as sl;
-import '../widgets/modular_location_selector.dart';
-import '../blocs/location_selection/location_selection_bloc.dart';
 import '../../../auth/presentation/blocs/auth_state.dart';
 
 /// Clean Architecture Home Page
@@ -44,19 +42,6 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  // ✅ UI → Event: Location selected
-  void _onLocationSelected(double lat, double lng, String locationName) {
-    final location = Location(
-      latitude: lat,
-      longitude: lng,
-      name: locationName,
-    );
-
-    context.read<HomeBloc>().add(
-      HomeLocationSelected(location: location, locationName: locationName),
-    );
   }
 
   // ✅ UI → Event: Search performed
@@ -259,19 +244,45 @@ class _HomePageState extends State<HomePage> {
             );
           },
           onSuggestionSelected: (suggestion) {
-            // Handle suggestion selection if needed
-            if (suggestion.latitude != null && suggestion.longitude != null) {
-              final location = Location(
-                latitude: suggestion.latitude!,
-                longitude: suggestion.longitude!,
+            // If this is a restaurant, navigate to detail page
+            if (suggestion.type?.toLowerCase().contains('restaurant') ?? false) {
+              // Create minimal Restaurant entity for initialRestaurant
+              final initialRestaurant = Restaurant(
+                id: 'osm_${suggestion.id}',
                 name: suggestion.name,
+                description: null,
+                address: suggestion.address,
+                latitude: suggestion.latitude,
+                longitude: suggestion.longitude,
+                imageUrls: const [],
+                rating: null,
+                reviewCount: 0,
+                categories: [suggestion.type ?? 'restaurant'],
+                openingHours: const {},
+                isActive: true,
+                createdAt: DateTime.now(),
               );
-              context.read<HomeBloc>().add(
-                HomeLocationSelected(
-                  location: location,
-                  locationName: suggestion.name,
-                ),
+              
+              AppNavigation.pushRestaurantDetail(
+                context,
+                'osm_${suggestion.id}',
+                initialRestaurant: initialRestaurant,
               );
+            } else {
+              // For non-restaurant places, update location
+              if (suggestion.latitude != null && suggestion.longitude != null) {
+                final location = Location(
+                  latitude: suggestion.latitude!,
+                  longitude: suggestion.longitude!,
+                  name: suggestion.name,
+                );
+                context.read<HomeBloc>().add(
+                  HomeLocationSelected(
+                    location: location,
+                    locationName: suggestion.name,
+                  ),
+                );
+              }
             }
           },
           latitude: state.location.latitude,
@@ -301,36 +312,59 @@ class _HomePageState extends State<HomePage> {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 20),
-          const Icon(Icons.location_off, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
+          const SizedBox(height: 40),
+          const Icon(Icons.location_off, size: 80, color: Colors.grey),
+          const SizedBox(height: 24),
           Text(
             'Konum İzni Gerekli',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Yakınızdaki restoranları görmek için konum izni vermeniz gerekmektedir.',
+            style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            'Yakınızdaki restoranları görmek için konum seçin',
-            style: Theme.of(context).textTheme.bodyMedium,
+            message,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.grey[600],
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
-          BlocProvider(
-            create: (context) => LocationSelectionBloc(
-              getTurkeyLocations: sl.sl<GetTurkeyLocations>(),
-            ),
-            child: ModularLocationSelector(
-              onLocationSelected: _onLocationSelected,
-              initialCity: 'İstanbul',
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextButton.icon(
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
             onPressed: _retryLocation,
             icon: const Icon(Icons.refresh),
             label: const Text('Konum İznini Tekrar Dene'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              textStyle: const TextStyle(fontSize: 16),
+            ),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: () {
+              // Open app settings
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Lütfen uygulama ayarlarından konum iznini açın'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            },
+            icon: const Icon(Icons.settings),
+            label: const Text('Ayarları Aç'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              textStyle: const TextStyle(fontSize: 16),
+            ),
           ),
         ],
       ),

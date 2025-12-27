@@ -72,6 +72,16 @@ class HybridSearchRepositoryImpl implements SearchRepository {
       }).toList();
     }
 
+    // ✅ Filter by hasMenu (only show restaurants with menus)
+    if (query.hasMenu == true) {
+      results = results.where((result) {
+        // Only filter restaurants (not menu items)
+        if (result.type != 'restaurant') return true;
+        // Keep only restaurants that have menus
+        return result.hasMenu == true;
+      }).toList();
+    }
+
     return SearchResponse(
       results: results,
       totalHits: results.length,

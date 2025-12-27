@@ -12,14 +12,27 @@ class RestaurantMenuPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<QuerySnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('items')
-          .where('restaurantId', isEqualTo: restaurantId)
-          .limit(1) // ✅ sadece var mı yok mu kontrol ediyoruz
-          .get(),
+    // ✅ Check for both regular menu items AND menu links
+    return FutureBuilder<List<QuerySnapshot>>(
+      future: Future.wait([
+        // Check for regular menu items
+        FirebaseFirestore.instance
+            .collection('items')
+            .where('restaurantId', isEqualTo: restaurantId)
+            .where('type', whereIn: ['food', 'drink', 'dessert'])
+            .limit(1)
+            .get(),
+        // Check for menu links (URL or photo)
+        FirebaseFirestore.instance
+            .collection('items')
+            .where('restaurantId', isEqualTo: restaurantId)
+            .where('type', isEqualTo: 'link')
+            .limit(1)
+            .get(),
+      ]),
       builder: (context, snapshot) {
-        final hasMenu = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
+        final hasMenu = snapshot.hasData && 
+            (snapshot.data![0].docs.isNotEmpty || snapshot.data![1].docs.isNotEmpty);
 
         return Container(
           color: Colors.white,

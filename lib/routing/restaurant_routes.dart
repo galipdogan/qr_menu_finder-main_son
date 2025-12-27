@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:qr_menu_finder/features/restaurant/presentation/blocs/restaurant_bloc.dart';
 import 'package:qr_menu_finder/injection_container.dart' as di;
 import 'route_names.dart';
+import '../features/restaurant/domain/entities/restaurant.dart';
 import '../features/restaurant/presentation/pages/restaurant_detail_page.dart';
 import '../features/restaurant/presentation/pages/restaurant_search_page.dart';
 import '../features/restaurant/presentation/pages/restaurant_map_page.dart';
@@ -14,9 +15,14 @@ final List<GoRoute> restaurantRoutes = [
     path: RouteNames.restaurantDetail, // /restaurant/:id
     builder: (context, state) {
       final id = state.pathParameters['id']!;
+      final initialRestaurant = state.extra as Restaurant?;
+      
       return BlocProvider(
         create: (_) => di.sl<RestaurantBloc>(),
-        child: RestaurantDetailPage(restaurantId: id),
+        child: RestaurantDetailPage(
+          restaurantId: id,
+          initialRestaurant: initialRestaurant,
+        ),
       );
     },
   ),

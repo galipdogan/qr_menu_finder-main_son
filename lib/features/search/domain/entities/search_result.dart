@@ -16,6 +16,7 @@ class SearchResult extends Equatable {
   final String? address;
   final String? city;
   final String? district;
+  final bool? hasMenu;  // ✅ New: Indicates if restaurant has menu
 
   const SearchResult({
     required this.id,
@@ -31,6 +32,7 @@ class SearchResult extends Equatable {
     this.address,
     this.city,
     this.district,
+    this.hasMenu,  // ✅ New parameter
   });
 
   @override
@@ -48,5 +50,6 @@ class SearchResult extends Equatable {
         address,
         city,
         district,
+        hasMenu,  // ✅ New
       ];
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/loading_indicator.dart';
@@ -81,6 +82,9 @@ class _MenuPageState extends State<MenuPage> {
 
         body: Column(
           children: [
+            // ✅ Menu Links Section (URLs and Photos)
+            _buildMenuLinksSection(),
+
             // ✅ Category filter
             MenuCategoryFilter(
               selectedCategory: _selectedCategory,
@@ -165,6 +169,96 @@ class _MenuPageState extends State<MenuPage> {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildMenuLinksSection() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('items')
+          .where('restaurantId', isEqualTo: widget.restaurantId)
+          .where('type', isEqualTo: 'link')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        final menuLinks = snapshot.data!.docs;
+
+        return Container(
+          color: AppColors.primary.withValues(alpha: 0.05),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.link, color: AppColors.primary, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Menü Linkleri',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ...menuLinks.map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final url = data['url'] as String?;
+                final source = data['source'] as String? ?? 'manual_link';
+
+                if (url == null) return const SizedBox.shrink();
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    leading: Icon(
+                      source == 'manual_link' ? Icons.link : Icons.photo,
+                      color: AppColors.primary,
+                    ),
+                    title: Text(
+                      source == 'manual_link' ? 'Menü URL' : 'Menü Fotoğrafı',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      url.length > 50 ? '${url.substring(0, 50)}...' : url,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    trailing: Icon(Icons.open_in_new, color: AppColors.primary),
+                    onTap: () async {
+                      try {
+                        await AppNavigation.launchExternalUrl(url);
+                      } catch (e) {
+                        if (context.mounted) {
+                          // Extract clean error message
+                          final errorMsg = e.toString().replaceFirst('Exception: ', '');
+                          
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(errorMsg),
+                              backgroundColor: AppColors.error,
+                              action: SnackBarAction(
+                                label: ErrorMessages.understood,
+                                textColor: Colors.white,
+                                onPressed: () {},
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                );
+              }),
+            ],
+          ),
+        );
+      },
     );
   }
 }

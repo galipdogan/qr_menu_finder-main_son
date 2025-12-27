@@ -8,6 +8,7 @@ import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../core/error/error_messages.dart';
 import '../../../../routing/app_navigation.dart';
+import '../../../restaurant/domain/entities/restaurant.dart';
 import '../../domain/entities/search_query.dart';
 import '../blocs/search_bloc.dart';
 import '../widgets/search_result_card.dart';
@@ -93,6 +94,7 @@ class _SearchPageState extends State<SearchPage> {
       minPrice: _minPrice,
       maxPrice: _maxPrice,
       minRating: _minRating,
+      hasMenu: true,
       page: 0,
     );
 
@@ -238,7 +240,29 @@ class _SearchPageState extends State<SearchPage> {
                   result: result,
                   onTap: () {
                     if (result.type == 'restaurant') {
-                      AppNavigation.pushRestaurantDetail(context, result.id);
+                      // Create a minimal Restaurant entity from SearchResult
+                      // to use as initialRestaurant fallback
+                      final initialRestaurant = Restaurant(
+                        id: result.id,
+                        name: result.name,
+                        description: result.description,
+                        address: result.address,
+                        latitude: null, // Search results don't have coordinates
+                        longitude: null,
+                        imageUrls: result.imageUrl != null ? [result.imageUrl!] : [],
+                        rating: result.rating,
+                        reviewCount: 0,
+                        categories: result.category != null ? [result.category!] : [],
+                        openingHours: const {},
+                        isActive: true,
+                        createdAt: DateTime.now(),
+                      );
+                      
+                      AppNavigation.pushRestaurantDetail(
+                        context,
+                        result.id,
+                        initialRestaurant: initialRestaurant,
+                      );
                     } else if (result.type == 'menu_item') {
                       AppNavigation.pushItemDetail(context, result.restaurantId!, result.id);
                     }
@@ -265,7 +289,28 @@ class _SearchPageState extends State<SearchPage> {
                   result: result,
                   onTap: () {
                     if (result.type == 'restaurant') {
-                      AppNavigation.pushRestaurantDetail(context, result.id);
+                      // Create a minimal Restaurant entity from SearchResult
+                      final initialRestaurant = Restaurant(
+                        id: result.id,
+                        name: result.name,
+                        description: result.description,
+                        address: result.address,
+                        latitude: null,
+                        longitude: null,
+                        imageUrls: result.imageUrl != null ? [result.imageUrl!] : [],
+                        rating: result.rating,
+                        reviewCount: 0,
+                        categories: result.category != null ? [result.category!] : [],
+                        openingHours: const {},
+                        isActive: true,
+                        createdAt: DateTime.now(),
+                      );
+                      
+                      AppNavigation.pushRestaurantDetail(
+                        context,
+                        result.id,
+                        initialRestaurant: initialRestaurant,
+                      );
                     } else if (result.type == 'menu_item') {
                       AppNavigation.pushItemDetail(context, result.restaurantId!, result.id);
                     }

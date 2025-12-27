@@ -17,56 +17,59 @@ class HomeLocationError extends HomeState {
   const HomeLocationError(this.message);
 
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [message];
 }
 
 class HomeLoaded extends HomeState {
   final Location location;
   final String locationName;
   final List<Restaurant> restaurants;
-  final Set<String> favoriteIds;
   final bool isLoadingRestaurants;
-  final bool isLoadingFavorites;
   final String? restaurantError;
+  final Set<String> favoriteIds;
+  final bool isLoadingFavorites;
 
   const HomeLoaded({
     required this.location,
     required this.locationName,
     this.restaurants = const [],
-    this.favoriteIds = const {},
     this.isLoadingRestaurants = false,
-    this.isLoadingFavorites = false,
     this.restaurantError,
+    this.favoriteIds = const {},
+    this.isLoadingFavorites = false,
   });
-
-  @override
-  List<Object?> get props => [
-    location,
-    locationName,
-    restaurants,
-    favoriteIds,
-    isLoadingRestaurants,
-    isLoadingFavorites,
-    restaurantError,
-  ];
 
   HomeLoaded copyWith({
     Location? location,
     String? locationName,
     List<Restaurant>? restaurants,
-    Set<String>? favoriteIds,
     bool? isLoadingRestaurants,
-    bool? isLoadingFavorites,
+    // Special handling for nullable fields using a wrapper or object check is ideal,
+    // but standard copyWith is common in Flutter Bloc.
+    // For now, we will assume standard behavior and if we need to clear error, we rely on new state emission.
     String? restaurantError,
+    Set<String>? favoriteIds,
+    bool? isLoadingFavorites,
   }) {
     return HomeLoaded(
       location: location ?? this.location,
       locationName: locationName ?? this.locationName,
       restaurants: restaurants ?? this.restaurants,
-      favoriteIds: favoriteIds ?? this.favoriteIds,
       isLoadingRestaurants: isLoadingRestaurants ?? this.isLoadingRestaurants,
-      isLoadingFavorites: isLoadingFavorites ?? this.isLoadingFavorites,
       restaurantError: restaurantError ?? this.restaurantError,
+      favoriteIds: favoriteIds ?? this.favoriteIds,
+      isLoadingFavorites: isLoadingFavorites ?? this.isLoadingFavorites,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        location,
+        locationName,
+        restaurants,
+        isLoadingRestaurants,
+        restaurantError,
+        favoriteIds,
+        isLoadingFavorites,
+      ];
 }
