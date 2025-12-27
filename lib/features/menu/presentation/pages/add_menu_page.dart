@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'dart:io';
 import '../../../../core/error/error_messages.dart';
 import '../../presentation/blocs/menu_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -43,23 +42,26 @@ class _AddMenuPageState extends State<AddMenuPage> {
       if (_uploadMethod == 'url' && _urlController.text.isNotEmpty) {
         // Handle URL upload
         await _handleUrlUpload(_urlController.text, widget.restaurantId!);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(ErrorMessages.menuAddedSuccess),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          Navigator.pop(context, true);
+        }
       } else if (_uploadMethod == 'photo' && _selectedImage != null) {
-        // Handle photo upload
-        await _handlePhotoUpload(_selectedImage!, widget.restaurantId!);
+        // Navigate to OCR verification page instead of uploading
+        if (mounted) {
+          context.push(
+            '/ocr-verification/${widget.restaurantId}',
+            extra: {'imagePath': _selectedImage!.path},
+          );
+        }
       } else {
         throw Exception(ErrorMessages.invalidMenuSelection);
-      }
-
-        if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(ErrorMessages.menuAddedSuccess),
-            backgroundColor: AppColors.success,
-          ),
-        );
-
-        // Return success to refresh parent screen
-        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -92,28 +94,6 @@ class _AddMenuPageState extends State<AddMenuPage> {
     if (state is MenuUploadFailure) throw Exception(state.message);
   }
 
-  /// Handle photo upload
-  Future<void> _handlePhotoUpload(XFile image, String restaurantId) async {
-    if (!mounted) return;
-    final bloc = context.read<MenuBloc>();
-
-    // Convert XFile to File
-    final File imageFile = File(image.path);
-
-    bloc.add(
-      UploadMenuPhoto(
-        restaurantId: restaurantId,
-        imageFile: imageFile,
-      ),
-    );
-
-    final state = await bloc.stream.firstWhere(
-      (s) => s is MenuUploadSuccess || s is MenuUploadFailure,
-    );
-
-    if (state is MenuUploadSuccess) return;
-    if (state is MenuUploadFailure) throw Exception(state.message);
-  }
 
   @override
   void initState() {
