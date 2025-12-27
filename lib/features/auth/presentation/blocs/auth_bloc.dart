@@ -3,27 +3,43 @@ import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/sign_in_with_email_password.dart';
 import '../../domain/usecases/sign_up_with_email_password.dart';
 import '../../domain/usecases/sign_out.dart';
+import '../../domain/usecases/send_password_reset_email.dart';
+import '../../domain/usecases/update_user_profile.dart';
+import '../../domain/usecases/delete_user_account.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/usecases/usecase.dart';
 
 import 'auth_event.dart';
 import 'auth_state.dart';
 
+/// AuthBloc - Manages authentication state
+/// 
+/// Refactored to support all auth operations with proper separation of concerns
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final GetCurrentUser getCurrentUser;
   final SignInWithEmailPassword signInWithEmailPassword;
   final SignUpWithEmailPassword signUpWithEmailPassword;
   final SignOut signOut;
+  final SendPasswordResetEmail sendPasswordResetEmail;
+  final UpdateUserProfile updateUserProfile;
+  final DeleteUserAccount deleteUserAccount;
 
   AuthBloc({
     required this.getCurrentUser,
     required this.signInWithEmailPassword,
     required this.signUpWithEmailPassword,
     required this.signOut,
+    required this.sendPasswordResetEmail,
+    required this.updateUserProfile,
+    required this.deleteUserAccount,
   }) : super(AuthInitial()) {
     on<AuthStatusCheckRequested>(_onAuthCheckRequested);
     on<AuthSignInRequested>(_onAuthSignInRequested);
     on<AuthSignUpRequested>(_onAuthSignUpRequested);
     on<AuthSignOutRequested>(_onAuthSignOutRequested);
+    on<AuthPasswordResetRequested>(_onPasswordResetRequested);
+    on<AuthProfileUpdateRequested>(_onProfileUpdateRequested);
+    on<AuthAccountDeletionRequested>(_onAccountDeletionRequested);
   }
 
   Future<void> _onAuthCheckRequested(
@@ -105,6 +121,79 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
+  Future<void> _onPasswordResetRequested(
+    AuthPasswordResetRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    AppLogger.i('AuthBloc: Password reset requested for ${event.email}');
+    emit(AuthLoading());
+
+    final result = await sendPasswordResetEmail(
+      SendPasswordResetParams(email: event.email),
+    );
+
+    result.fold(
+      (failure) {
+        AppLogger.e('AuthBloc: Password reset failed', error: failure.message);
+        emit(AuthError(message: failure.userMessage));
+      },
+      (_) {
+        AppLogger.i('AuthBloc: Password reset email sent');
+        emit(AuthActionSuccess(
+          message: 'Şifre sıfırlama e-postası gönderildi',
+        ));
+      },
+    );
+  }
+
+  Future<void> _onProfileUpdateRequested(
+    AuthProfileUpdateRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    AppLogger.i('AuthBloc: Profile update requested');
+    emit(AuthLoading());
+
+    final result = await updateUserProfile(
+      UpdateUserProfileParams(
+        displayName: event.displayName,
+        photoURL: event.photoURL,
+      ),
+    );
+
+    result.fold(
+      (failure) {
+        AppLogger.e('AuthBloc: Profile update failed', error: failure.message);
+        emit(AuthError(message: failure.userMessage));
+      },
+      (user) {
+        AppLogger.i('AuthBloc: Profile updated successfully');
+        emit(AuthAuthenticated(user: user));
+      },
+    );
+  }
+
+  Future<void> _onAccountDeletionRequested(
+    AuthAccountDeletionRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    AppLogger.i('AuthBloc: Account deletion requested');
+    emit(AuthLoading());
+
+    final result = await deleteUserAccount(NoParams());
+
+    result.fold(
+      (failure) {
+        AppLogger.e('AuthBloc: Account deletion failed', error: failure.message);
+        emit(AuthError(message: failure.userMessage));
+      },
+      (_) {
+        AppLogger.i('AuthBloc: Account deleted successfully');
+        emit(const AuthUnauthenticated(reason: 'Hesap silindi'));
+      },
+    );
+  }
+
+  // Helper method for auth actions that return a User
   Future<void> _handleAuthAction(
     Emitter<AuthState> emit,
     Future<dynamic> Function() action, {

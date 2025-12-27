@@ -30,12 +30,16 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
     final querySnapshot = await firestore
         .collection(AppConstants.reviewsCollection)
         .where('userId', isEqualTo: userId)
-        .orderBy('createdAt', descending: true)
         .get();
 
-    return querySnapshot.docs
+    // Sort client-side to avoid composite index requirement
+    final reviews = querySnapshot.docs
         .map((doc) => ReviewModel.fromFirestore(doc))
         .toList();
+    
+    reviews.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+    return reviews;
   }
 
   @override
@@ -43,12 +47,16 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
     final querySnapshot = await firestore
         .collection(AppConstants.reviewsCollection)
         .where('restaurantId', isEqualTo: restaurantId)
-        .orderBy('createdAt', descending: true)
         .get();
 
-    return querySnapshot.docs
+    // Sort client-side to avoid composite index requirement
+    final reviews = querySnapshot.docs
         .map((doc) => ReviewModel.fromFirestore(doc))
         .toList();
+    
+    reviews.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+    return reviews;
   }
 
   @override

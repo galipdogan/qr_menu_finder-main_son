@@ -49,3 +49,18 @@ class AuthError extends AuthState {
   @override
   List<Object> get props => [message, timestamp];
 }
+
+/// State when an action completes successfully without changing auth status
+/// 
+/// Used for operations like password reset email sent, profile updated, etc.
+class AuthActionSuccess extends AuthState {
+  final String message;
+  final DateTime timestamp;
+
+  AuthActionSuccess({required this.message, DateTime? timestamp})
+    : timestamp = timestamp ?? DateTime.now();
+
+  @override
+  List<Object> get props => [message, timestamp];
+}
+

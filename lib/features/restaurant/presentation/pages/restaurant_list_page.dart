@@ -10,6 +10,8 @@ import '../../../../core/error/error_messages.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
 import '../../../auth/presentation/blocs/auth_state.dart';
 import '../../../favorites/presentation/blocs/favorites_bloc.dart';
+import '../../../favorites/presentation/blocs/favorites_event.dart';
+import '../../../favorites/presentation/blocs/favorites_state.dart';
 import '../../../favorites/domain/entities/favorite_item.dart';
 import '../blocs/restaurant_bloc.dart';
 import '../blocs/restaurant_event.dart';

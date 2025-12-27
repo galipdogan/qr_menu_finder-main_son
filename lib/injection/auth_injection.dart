@@ -8,6 +8,9 @@ import '../features/auth/domain/usecases/get_current_user.dart';
 import '../features/auth/domain/usecases/sign_in_with_email_password.dart';
 import '../features/auth/domain/usecases/sign_out.dart';
 import '../features/auth/domain/usecases/sign_up_with_email_password.dart';
+import '../features/auth/domain/usecases/send_password_reset_email.dart';
+import '../features/auth/domain/usecases/update_user_profile.dart';
+import '../features/auth/domain/usecases/delete_user_account.dart';
 import '../features/auth/presentation/blocs/auth_bloc.dart';
 
 void injectAuth(GetIt sl) {
@@ -17,6 +20,9 @@ void injectAuth(GetIt sl) {
       signInWithEmailPassword: sl(),
       signUpWithEmailPassword: sl(),
       signOut: sl(),
+      sendPasswordResetEmail: sl(),
+      updateUserProfile: sl(),
+      deleteUserAccount: sl(),
     ),
   );
 
@@ -24,6 +30,9 @@ void injectAuth(GetIt sl) {
   sl.registerLazySingleton(() => SignInWithEmailPassword(sl()));
   sl.registerLazySingleton(() => SignUpWithEmailPassword(sl()));
   sl.registerLazySingleton(() => SignOut(sl()));
+  sl.registerLazySingleton(() => SendPasswordResetEmail(sl()));
+  sl.registerLazySingleton(() => UpdateUserProfile(sl()));
+  sl.registerLazySingleton(() => DeleteUserAccount(sl()));
 
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: sl(), localDataSource: sl(), mappr: sl()),

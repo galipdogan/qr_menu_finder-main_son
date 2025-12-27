@@ -6,7 +6,6 @@ import '../../../restaurant/data/models/restaurant_model.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
-// import '../../../maps/data/services/location_service.dart'; // Removed
 import '../blocs/restaurant_bloc.dart';
 import '../blocs/restaurant_event.dart';
 import '../blocs/restaurant_state.dart';
@@ -35,7 +34,6 @@ class AddRestaurantView extends StatefulWidget {
 
 class _AddRestaurantViewState extends State<AddRestaurantView> {
   final _formKey = GlobalKey<FormState>();
-  // final _locationService = LocationService(); // Removed
 
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
@@ -45,7 +43,6 @@ class _AddRestaurantViewState extends State<AddRestaurantView> {
   final _districtController = TextEditingController();
 
   domain_location.Location? _selectedLocation; // Use aliased Location
-  // bool _isGettingLocation = false; // Managed by HomeBloc state
 
   @override
   void dispose() {

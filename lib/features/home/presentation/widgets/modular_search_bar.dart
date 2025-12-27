@@ -73,7 +73,8 @@ class _ModularSearchBarState extends State<ModularSearchBar> {
       widget.onSuggestionSelected!(suggestion);
     }
     
-    widget.onSearch(suggestion.name);
+    // Don't call widget.onSearch here - onSuggestionSelected handles navigation
+    // widget.onSearch is only for manual search (Enter key or search button)
     _focusNode.unfocus();
   }
 

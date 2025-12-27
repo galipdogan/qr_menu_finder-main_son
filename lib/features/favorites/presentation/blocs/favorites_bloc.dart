@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/favorite_item.dart';
 import '../../domain/usecases/add_favorite.dart';
@@ -6,126 +5,12 @@ import '../../domain/usecases/get_user_favorites.dart';
 import '../../domain/usecases/remove_favorite.dart';
 import '../../domain/usecases/toggle_favorite.dart';
 import '../../../../core/utils/app_logger.dart';
+import 'favorites_event.dart';
+import 'favorites_state.dart';
 
-// Events
-abstract class FavoritesEvent extends Equatable {
-  const FavoritesEvent();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class FavoritesLoadRequested extends FavoritesEvent {
-  final String userId;
-  final FavoriteType? type;
-
-  const FavoritesLoadRequested({
-    required this.userId,
-    this.type,
-  });
-
-  @override
-  List<Object?> get props => [userId, type];
-}
-
-class FavoriteToggleRequested extends FavoritesEvent {
-  final String userId;
-  final String itemId;
-  final FavoriteType type;
-
-  const FavoriteToggleRequested({
-    required this.userId,
-    required this.itemId,
-    required this.type,
-  });
-
-  @override
-  List<Object> get props => [userId, itemId, type];
-}
-
-class FavoriteAddRequested extends FavoritesEvent {
-  final String userId;
-  final String itemId;
-  final FavoriteType type;
-
-  const FavoriteAddRequested({
-    required this.userId,
-    required this.itemId,
-    required this.type,
-  });
-
-  @override
-  List<Object> get props => [userId, itemId, type];
-}
-
-class FavoriteRemoveRequested extends FavoritesEvent {
-  final String favoriteId;
-
-  const FavoriteRemoveRequested({required this.favoriteId});
-
-  @override
-  List<Object> get props => [favoriteId];
-}
-
-// States
-abstract class FavoritesState extends Equatable {
-  const FavoritesState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class FavoritesInitial extends FavoritesState {}
-
-class FavoritesLoading extends FavoritesState {}
-
-class FavoritesLoaded extends FavoritesState {
-  final List<FavoriteItem> favorites;
-
-  const FavoritesLoaded({required this.favorites});
-
-  bool get isEmpty => favorites.isEmpty;
-
-  @override
-  List<Object> get props => [favorites];
-}
-
-class FavoriteToggling extends FavoritesState {
-  final List<FavoriteItem> currentFavorites;
-  final String itemId;
-
-  const FavoriteToggling({
-    required this.currentFavorites,
-    required this.itemId,
-  });
-
-  @override
-  List<Object> get props => [currentFavorites, itemId];
-}
-
-class FavoriteToggled extends FavoritesState {
-  final bool isFavorited;
-  final String itemId;
-
-  const FavoriteToggled({
-    required this.isFavorited,
-    required this.itemId,
-  });
-
-  @override
-  List<Object> get props => [isFavorited, itemId];
-}
-
-class FavoritesError extends FavoritesState {
-  final String message;
-
-  const FavoritesError({required this.message});
-
-  @override
-  List<Object> get props => [message];
-}
-
-// Bloc
+/// FavoritesBloc - Manages favorites state
+/// 
+/// Refactored for better maintainability and clearer state management
 class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   final GetUserFavorites getUserFavorites;
   final AddFavorite addFavorite;
@@ -148,7 +33,9 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     FavoritesLoadRequested event,
     Emitter<FavoritesState> emit,
   ) async {
-    AppLogger.i('FavoritesBloc: Loading favorites for user ${event.userId}, type: ${event.type}');
+    AppLogger.i(
+      'FavoritesBloc: Loading favorites for user ${event.userId}, type: ${event.type}',
+    );
     emit(FavoritesLoading());
 
     final result = await getUserFavorites(
@@ -160,8 +47,11 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
 
     result.fold(
       (failure) {
-        AppLogger.e('FavoritesBloc: Failed to load favorites', error: failure.message);
-        emit(FavoritesError(message: failure.message));
+        AppLogger.e(
+          'FavoritesBloc: Failed to load favorites',
+          error: failure.message,
+        );
+        emit(FavoritesError(message: failure.userMessage));
       },
       (favorites) {
         AppLogger.i('FavoritesBloc: Loaded ${favorites.length} favorites');
@@ -174,18 +64,15 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     FavoriteToggleRequested event,
     Emitter<FavoritesState> emit,
   ) async {
-    AppLogger.i('FavoritesBloc: Toggle requested for item ${event.itemId} by user ${event.userId}');
-    final currentState = state;
-    List<FavoriteItem> currentFavorites = [];
+    AppLogger.i(
+      'FavoritesBloc: Toggle requested for item ${event.itemId} by user ${event.userId}',
+    );
 
-    if (currentState is FavoritesLoaded) {
-      currentFavorites = currentState.favorites;
-      AppLogger.d('   Current favorites count: ${currentFavorites.length}');
-      emit(FavoriteToggling(
-        currentFavorites: currentFavorites,
-        itemId: event.itemId,
-      ));
-    }
+    // Store current state for rollback
+    final currentState = state;
+    final currentFavorites = currentState is FavoritesLoaded
+        ? currentState.favorites
+        : <FavoriteItem>[];
 
     final result = await toggleFavorite(
       ToggleFavoriteParams(
@@ -197,52 +84,52 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
 
     result.fold(
       (failure) {
-        AppLogger.e('FavoritesBloc: Toggle failed for item ${event.itemId}', error: failure.message);
-        emit(FavoritesError(message: failure.message));
+        AppLogger.e(
+          'FavoritesBloc: Toggle failed for item ${event.itemId}',
+          error: failure.message,
+        );
+        emit(FavoritesError(message: failure.userMessage));
+        
         // Restore previous state
         if (currentFavorites.isNotEmpty) {
           emit(FavoritesLoaded(favorites: currentFavorites));
         }
       },
       (isFavorited) async {
-        AppLogger.i('   Toggle result: isFavorited = $isFavorited');
-        
-        // Check if emit is still valid before proceeding
-        if (emit.isDone) return;
-        
-        if (isFavorited) {
-          AppLogger.d('   Item was ADDED - reloading favorites to get new item with ID');
-          // Item was added to favorites - reload to get the new item with its ID
-          final reloadResult = await getUserFavorites(
-            GetUserFavoritesParams(userId: event.userId, type: event.type),
-          );
-          
-          // Check again before emitting
-          if (emit.isDone) return;
-          
-          reloadResult.fold(
-            (failure) {
-              AppLogger.e('FavoritesBloc: Failed to reload after add', error: failure.message);
-              emit(FavoritesError(message: failure.message));
-              // Restore previous state
-              if (currentFavorites.isNotEmpty) {
-                emit(FavoritesLoaded(favorites: currentFavorites));
-              }
-            },
-            (favorites) {
-              AppLogger.i('FavoritesBloc: Item ADDED - now ${favorites.length} favorites');
-              emit(FavoritesLoaded(favorites: favorites));
-            },
-          );
-        } else {
-          AppLogger.d('   Item was REMOVED - filtering from current list');
-          // Item was removed - just filter it out from current list
-          final updatedFavorites = currentFavorites
-              .where((fav) => fav.itemId != event.itemId)
-              .toList();
-          AppLogger.i('FavoritesBloc: Item REMOVED - now ${updatedFavorites.length} favorites');
-          emit(FavoritesLoaded(favorites: updatedFavorites));
-        }
+        AppLogger.i('FavoritesBloc: Toggle result - isFavorited: $isFavorited');
+
+        // Emit success message
+        emit(FavoriteActionSuccess(
+          message: isFavorited
+              ? 'Favorilere eklendi'
+              : 'Favorilerden kaldırıldı',
+          isFavorited: isFavorited,
+          itemId: event.itemId,
+        ));
+
+        // Reload favorites to get updated list
+        final reloadResult = await getUserFavorites(
+          GetUserFavoritesParams(userId: event.userId, type: event.type),
+        );
+
+        reloadResult.fold(
+          (failure) {
+            AppLogger.e(
+              'FavoritesBloc: Failed to reload after toggle',
+              error: failure.message,
+            );
+            // Keep the current state on reload failure
+            if (currentFavorites.isNotEmpty) {
+              emit(FavoritesLoaded(favorites: currentFavorites));
+            }
+          },
+          (favorites) {
+            AppLogger.i(
+              'FavoritesBloc: Reloaded - now ${favorites.length} favorites',
+            );
+            emit(FavoritesLoaded(favorites: favorites));
+          },
+        );
       },
     );
   }
@@ -251,6 +138,10 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     FavoriteAddRequested event,
     Emitter<FavoritesState> emit,
   ) async {
+    AppLogger.i(
+      'FavoritesBloc: Add requested for item ${event.itemId} by user ${event.userId}',
+    );
+
     final result = await addFavorite(
       AddFavoriteParams(
         userId: event.userId,
@@ -260,10 +151,25 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     );
 
     result.fold(
-      (failure) => emit(FavoritesError(message: failure.message)),
+      (failure) {
+        AppLogger.e(
+          'FavoritesBloc: Failed to add favorite',
+          error: failure.message,
+        );
+        emit(FavoritesError(message: failure.userMessage));
+      },
       (_) {
-        // Reload favorites after add
-        add(FavoritesLoadRequested(userId: event.userId));
+        AppLogger.i('FavoritesBloc: Favorite added successfully');
+        
+        // Emit success message
+        emit(const FavoriteActionSuccess(
+          message: 'Favorilere eklendi',
+          isFavorited: true,
+          itemId: '',
+        ));
+
+        // Reload favorites
+        add(FavoritesLoadRequested(userId: event.userId, type: event.type));
       },
     );
   }
@@ -273,37 +179,55 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     Emitter<FavoritesState> emit,
   ) async {
     AppLogger.i('FavoritesBloc: Remove requested for favorite ${event.favoriteId}');
+
+    // Store current state for optimistic update
+    final currentState = state;
+    if (currentState is! FavoritesLoaded) return;
+
+    final currentFavorites = currentState.favorites;
+    
+    // Find the favorite to remove
+    final removedFavorite = currentFavorites.firstWhere(
+      (f) => f.id == event.favoriteId,
+      orElse: () => currentFavorites.first,
+    );
+
+    // Optimistic update - remove immediately
+    final updatedFavorites = currentFavorites
+        .where((f) => f.id != event.favoriteId)
+        .toList();
+    
+    emit(FavoritesLoaded(favorites: updatedFavorites));
+
     final result = await removeFavorite(
       RemoveFavoriteParams(favoriteId: event.favoriteId),
     );
 
     result.fold(
       (failure) {
-        AppLogger.e('FavoritesBloc: Failed to remove favorite ${event.favoriteId}', error: failure.message);
-        emit(FavoritesError(message: failure.message));
+        AppLogger.e(
+          'FavoritesBloc: Failed to remove favorite ${event.favoriteId}',
+          error: failure.message,
+        );
+        
+        // Rollback on error
+        emit(FavoritesLoaded(favorites: currentFavorites));
+        emit(FavoritesError(message: failure.userMessage));
       },
       (_) {
-        AppLogger.d('   Remove successful - updating state');
-        // Remove from current state without reload
-        if (state is FavoritesLoaded) {
-          final currentFavorites = (state as FavoritesLoaded).favorites;
-          AppLogger.d('   Current favorites count: ${currentFavorites.length}');
+        AppLogger.i(
+          'FavoritesBloc: Favorite removed - now ${updatedFavorites.length} favorites',
+        );
 
-          // Find the removed item's itemId for the FavoriteToggled event
-          final removedFavorite = currentFavorites.firstWhere(
-            (f) => f.id == event.favoriteId,
-            orElse: () => currentFavorites.first, // Fallback
-          );
+        // Emit success message
+        emit(FavoriteActionSuccess(
+          message: 'Favorilerden kaldırıldı',
+          isFavorited: false,
+          itemId: removedFavorite.itemId,
+        ));
 
-          final updatedFavorites = currentFavorites
-              .where((f) => f.id != event.favoriteId)
-              .toList();
-          AppLogger.i('FavoritesBloc: Favorite removed - now ${updatedFavorites.length} favorites');
-
-          // Emit FavoriteToggled first so UI can show the message
-          emit(FavoriteToggled(isFavorited: false, itemId: removedFavorite.itemId));
-          emit(FavoritesLoaded(favorites: updatedFavorites));
-        }
+        // Keep the updated state
+        emit(FavoritesLoaded(favorites: updatedFavorites));
       },
     );
   }

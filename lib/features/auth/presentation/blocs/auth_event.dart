@@ -40,3 +40,31 @@ class AuthSignUpRequested extends AuthEvent {
 
 /// Triggered when user requests to sign out
 class AuthSignOutRequested extends AuthEvent {}
+
+/// Triggered when user requests password reset email
+class AuthPasswordResetRequested extends AuthEvent {
+  final String email;
+
+  const AuthPasswordResetRequested({required this.email});
+
+  @override
+  List<Object> get props => [email];
+}
+
+/// Triggered when user updates their profile
+class AuthProfileUpdateRequested extends AuthEvent {
+  final String? displayName;
+  final String? photoURL;
+
+  const AuthProfileUpdateRequested({
+    this.displayName,
+    this.photoURL,
+  });
+
+  @override
+  List<Object?> get props => [displayName, photoURL];
+}
+
+/// Triggered when user requests account deletion
+class AuthAccountDeletionRequested extends AuthEvent {}
+

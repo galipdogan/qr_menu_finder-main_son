@@ -117,7 +117,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.05),
+                color: AppColors.primary.withValues(alpha: 0.05),
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(12),
                 ),
@@ -223,8 +223,8 @@ class _SearchResultCardState extends State<SearchResultCard> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isRestaurant
-            ? AppColors.primary.withOpacity(0.1)
-            : Colors.orange.withOpacity(0.1),
+            ? AppColors.primary.withValues(alpha: 0.1)
+            : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(

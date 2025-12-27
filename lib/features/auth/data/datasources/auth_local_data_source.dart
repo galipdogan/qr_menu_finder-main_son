@@ -1,8 +1,11 @@
 import 'package:qr_menu_finder/core/utils/app_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/error/error.dart';
 import '../models/user_model.dart';
 
-/// Abstract local data source
+/// Abstract local data source for authentication
+/// 
+/// Provides caching mechanism for user data
 abstract class AuthLocalDataSource {
   Future<void> cacheUser(UserModel user);
   Future<UserModel?> getCachedUser();
@@ -10,6 +13,8 @@ abstract class AuthLocalDataSource {
 }
 
 /// Implementation with SharedPreferences
+/// 
+/// Handles local persistence of user data with proper error handling
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final SharedPreferences sharedPreferences;
 
@@ -20,10 +25,16 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> cacheUser(UserModel user) async {
     try {
-      await sharedPreferences.setString(cachedUserKey, user.toJsonString());
+      final success = await sharedPreferences.setString(
+        cachedUserKey,
+        user.toJsonString(),
+      );
+      if (!success) {
+        throw const CacheException('Failed to cache user data');
+      }
     } catch (e) {
-      // Burada loglama yapabilirsin
-      AppLogger.e('Failed to cache user: $e');
+      AppLogger.e('Failed to cache user', error: e);
+      throw CacheException('Failed to cache user: ${e.toString()}');
     }
   }
 
@@ -31,17 +42,26 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   Future<UserModel?> getCachedUser() async {
     try {
       final jsonString = sharedPreferences.getString(cachedUserKey);
-      if (jsonString != null) {
-        return UserModel.fromJsonString(jsonString);
-      }
+      if (jsonString == null) return null;
+      
+      return UserModel.fromJsonString(jsonString);
     } catch (e) {
-      AppLogger.e('Failed to get cached user: $e');
+      AppLogger.e('Failed to get cached user', error: e);
+      // Return null instead of throwing - cache miss is not critical
+      return null;
     }
-    return null;
   }
 
   @override
   Future<void> clearCache() async {
-    await sharedPreferences.remove(cachedUserKey);
+    try {
+      final success = await sharedPreferences.remove(cachedUserKey);
+      if (!success) {
+        AppLogger.w('Failed to clear cache - key may not exist');
+      }
+    } catch (e) {
+      AppLogger.e('Failed to clear cache', error: e);
+      throw CacheException('Failed to clear cache: ${e.toString()}');
+    }
   }
 }

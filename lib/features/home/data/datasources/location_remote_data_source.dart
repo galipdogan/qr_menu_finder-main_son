@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../../../core/maps/data/datasources/photon_remote_data_source.dart';

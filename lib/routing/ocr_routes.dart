@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import 'package:qr_menu_finder/features/menu/presentation/pages/ocr_verification_page.dart';
+import 'package:qr_menu_finder/features/ocr/presentation/pages/ocr_verification_page.dart';
 import 'route_names.dart';
 
 final List<GoRoute> ocrRoutes = [

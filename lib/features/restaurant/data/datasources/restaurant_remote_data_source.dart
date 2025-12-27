@@ -7,7 +7,6 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/maps/data/datasources/openstreetmap_details_remote_data_source.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/models/place_result.dart';
-import '../../../../core/models/nominatim_place.dart';
 import '../../../../core/services/nominatim_service.dart';
 import '../models/restaurant_model.dart';
 import '../cache/restaurant_cache_service.dart';

@@ -15,6 +15,7 @@ import 'core/theme/theme_bloc.dart';
 import 'core/theme/theme_state.dart';
 import 'features/auth/presentation/blocs/auth_bloc.dart';
 import 'features/favorites/presentation/blocs/favorites_bloc.dart';
+import 'features/favorites/presentation/blocs/favorites_event.dart';
 import 'features/favorites/domain/entities/favorite_item.dart';
 import 'features/home/presentation/blocs/home_bloc.dart';
 import 'features/review/presentation/blocs/review_bloc.dart';

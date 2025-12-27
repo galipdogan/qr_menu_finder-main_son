@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../routing/route_names.dart';
 
 class RestaurantBackButton extends StatelessWidget {
   const RestaurantBackButton({super.key});
@@ -15,7 +17,14 @@ class RestaurantBackButton extends StatelessWidget {
         ),
         child: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            // Check if we can pop, otherwise go to home
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(RouteNames.home);
+            }
+          },
         ),
       ),
     );

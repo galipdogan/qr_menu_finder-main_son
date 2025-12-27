@@ -246,9 +246,19 @@ class _HomePageState extends State<HomePage> {
           onSuggestionSelected: (suggestion) {
             // If this is a restaurant, navigate to detail page
             if (suggestion.type?.toLowerCase().contains('restaurant') ?? false) {
+              // Extract the OSM place ID from suggestion
+              // The suggestion.id might already be the place_id or osm_id
+              final placeId = suggestion.id;
+              
+              // Create restaurant ID in the format expected by the app
+              // If it doesn't start with 'osm_', add the prefix
+              final restaurantId = placeId.startsWith('osm_') 
+                  ? placeId 
+                  : 'osm_$placeId';
+              
               // Create minimal Restaurant entity for initialRestaurant
               final initialRestaurant = Restaurant(
-                id: 'osm_${suggestion.id}',
+                id: restaurantId,
                 name: suggestion.name,
                 description: null,
                 address: suggestion.address,
@@ -263,9 +273,10 @@ class _HomePageState extends State<HomePage> {
                 createdAt: DateTime.now(),
               );
               
-              AppNavigation.pushRestaurantDetail(
+              // Use goRestaurantDetail instead of pushRestaurantDetail
+              AppNavigation.goRestaurantDetail(
                 context,
-                'osm_${suggestion.id}',
+                restaurantId,
                 initialRestaurant: initialRestaurant,
               );
             } else {
