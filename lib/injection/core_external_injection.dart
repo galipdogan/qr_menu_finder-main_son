@@ -15,9 +15,13 @@ import '../core/maps/data/datasources/photon_remote_data_source.dart';
 import '../core/maps/data/datasources/turkey_location_remote_data_source.dart';
 
 import '../core/mapper/mapper.dart';
+import '../core/l10n/locale_cubit.dart';
 
 void injectCore(GetIt sl) {
   sl.registerLazySingleton<Mappr>(() => Mappr());
+  
+  // Locale Cubit for language management
+  sl.registerFactory<LocaleCubit>(() => LocaleCubit(sl()));
 }
 
 Future<void> injectExternal(GetIt sl) async {

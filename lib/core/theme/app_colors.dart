@@ -5,10 +5,15 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Ana Renkler
-  static const Color primary = Color(0xFF4DB8AC);
-  static const Color primaryLight = Color(0xFF6FD4C8);
-  static const Color primaryDark = Color(0xFF3A9A8F);
+  // Ana Renkler - Figma Food Delivery Theme
+  static const Color primary = Color(0xFFE86A33); // Vibrant Orange
+  static const Color primaryLight = Color(0xFFFF8A5B);
+  static const Color primaryDark = Color(0xFFD45A23);
+
+  // Accent Renkler - Golden Yellow
+  static const Color accent = Color(0xFFFFC529);
+  static const Color accentLight = Color(0xFFFFD65C);
+  static const Color accentDark = Color(0xFFE6B024);
 
   // İkincil Renkler
   static const Color secondary = Color(0xFF7F8C8D);
@@ -21,13 +26,13 @@ class AppColors {
   static const Color error = Color(0xFFE74C3C);
   static const Color info = Color(0xFF3498DB);
 
-  // Yüzey ve Arka Plan
-  static const Color background = Color(0xFFE8F4F3);
+  // Yüzey ve Arka Plan - Warm Cream Theme
+  static const Color background = Color(0xFFF7F4EB); // Light Cream
   static const Color backgroundDark = Color(0xFF1A1A1A);
-  static const Color surface = Color(0xFFFFFFFF);
+  static const Color surface = Color(0xFFFFFFFF); // Pure White Cards
   static const Color surfaceDark = Color(0xFF242424);
   static const Color overlay = Color(0x20000000);
-  static const Color shadow = Color(0x15000000);
+  static const Color shadow = Color(0x10000000); // Softer shadow
 
   // Metin Renkleri
   static const Color textPrimary = Color(0xFF2C3E50);

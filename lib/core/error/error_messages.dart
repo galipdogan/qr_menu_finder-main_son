@@ -58,6 +58,8 @@ class ErrorMessages {
     static const String menuTitle = 'Menü';
     static const String menuEmptyPrompt =
       'Menü öğelerini görüntülemek için yenileyin.';
+    static const String showMenuButton = 'Menüyü Görüntüle';
+    static const String addMenuButton = 'Menü Ekle';
   static const String menuItemAddFailed = 'Menü öğesi eklenirken bir hata oluştu. Lütfen tekrar deneyin.';
   static const String menuItemUpdateFailed = 'Menü öğesi güncellenirken bir hata oluştu. Lütfen tekrar deneyin.';
   static const String menuItemDeleteFailed = 'Menü öğesi silinirken bir hata oluştu. Lütfen tekrar deneyin.';
@@ -124,6 +126,9 @@ class ErrorMessages {
       static const String cancel = 'İptal';
       static const String clear = 'Temizle';
       static const String mustLogin = 'Giriş Yapmalısınız';
+      static const String mustLoginForProfile = 'Profilinizi görüntülemek için giriş yapmanız gerekmektedir.';
+      static const String loginButton = 'Giriş Yap';
+      static const String signupPrompt = 'Hesabınız yok mu? Kayıt olun';
       static const String mustLoginForHistory = 'Geçmişinizi görmek için lütfen giriş yapın.';
       static const String historyCleared = 'Geçmiş temizlendi';
       static const String historyClearing = 'Geçmiş temizleniyor...';

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/error/error_messages.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/route_names.dart';
 import '../blocs/auth_bloc.dart';
 import '../blocs/auth_state.dart';
@@ -98,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: isLoading
                             ? null
                             : () => context.go(RouteNames.signup),
-                        child: const Text('Hesabınız yok mu? Kayıt olun'),
+                        child: Text(AppLocalizations.of(context)!.signupPrompt),
                       ),
                     ],
                   ),

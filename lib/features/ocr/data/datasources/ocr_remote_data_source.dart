@@ -68,7 +68,7 @@ class MLKitOcrDataSourceImpl implements OcrRemoteDataSource {
                   name: name,
                   price: price,
                   currency: 'TRY',
-                  raw: line,
+                  rawText: line,
                 ),
               );
             }

@@ -224,7 +224,7 @@ class _MenuUploadPageState extends State<MenuUploadPage> {
         name: newName,
         price: _parsedItems[index].price,
         currency: _parsedItems[index].currency,
-        raw: _parsedItems[index].raw,
+        rawText: _parsedItems[index].rawText,
       );
     });
   }
@@ -237,7 +237,7 @@ class _MenuUploadPageState extends State<MenuUploadPage> {
         name: _parsedItems[index].name,
         price: newPrice,
         currency: _parsedItems[index].currency,
-        raw: _parsedItems[index].raw,
+        rawText: _parsedItems[index].rawText,
       );
     });
   }

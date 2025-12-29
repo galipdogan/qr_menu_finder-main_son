@@ -83,3 +83,8 @@ class NotFoundFailure extends Failure {
 class GeneralFailure extends Failure {
   const GeneralFailure(super.message, {super.code, super.originalError});
 }
+
+/// OCR-related failures (text recognition, parsing issues)
+class OcrFailure extends Failure {
+  const OcrFailure([super.message = 'OCR processing failed']);
+}

@@ -13,20 +13,19 @@ import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_bloc.dart';
 import 'core/theme/theme_state.dart';
+import 'core/l10n/locale_cubit.dart';
+import 'l10n/app_localizations.dart';
 import 'features/auth/presentation/blocs/auth_bloc.dart';
 import 'features/favorites/presentation/blocs/favorites_bloc.dart';
 import 'features/favorites/presentation/blocs/favorites_event.dart';
 import 'features/favorites/domain/entities/favorite_item.dart';
 import 'features/home/presentation/blocs/home_bloc.dart';
 import 'features/review/presentation/blocs/review_bloc.dart';
-//import 'features/notifications/presentation/blocs/notification_bloc.dart'; // New import
 import 'package:qr_menu_finder/core/usecases/usecase.dart';
 import 'package:qr_menu_finder/features/analytics/domain/usecases/initialize_analytics.dart'; // New import for Analytics UseCase
 import 'routing/app_router.dart';
 import 'injection_container.dart' as di;
 import 'core/utils/env_config.dart';
-// import 'core/services/analytics_service.dart'; // Removed
-// import 'core/services/notification_service.dart'; // Removed
 import 'core/utils/app_logger.dart';
 
 void main() async {
@@ -50,7 +49,6 @@ void main() async {
 
   // Initialize Notifications
   // Handled by NotificationBloc
-  // await di.sl<NotificationService>().initialize(); // Removed
 
   // OpenStreetMap kullanıldığı için Google Maps API yüklemeye gerek yok
   AppLogger.i('🗺️ Using OpenStreetMap (no API key required)');
@@ -86,6 +84,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => di.sl<ThemeBloc>()),
+        BlocProvider(create: (context) => di.sl<LocaleCubit>()),
         BlocProvider(
           create: (context) {
             final bloc = di.sl<AuthBloc>();
@@ -133,17 +132,26 @@ class MyApp extends StatelessWidget {
             }
           }
         },
-        child: BlocBuilder<ThemeBloc, ThemeState>(
-          builder: (context, state) {
-            return MaterialApp.router(
-              title: AppConstants.appName,
-              debugShowCheckedModeBanner: false,
-              routerConfig: AppRouter.router,
+        child: BlocBuilder<LocaleCubit, Locale>(
+          builder: (context, locale) {
+            return BlocBuilder<ThemeBloc, ThemeState>(
+              builder: (context, state) {
+                return MaterialApp.router(
+                  title: AppConstants.appName,
+                  debugShowCheckedModeBanner: false,
+                  routerConfig: AppRouter.router,
 
-              // 🎨 Theme System with dynamic switching
-              theme: AppTheme.light,
-              darkTheme: AppTheme.dark,
-              themeMode: state.themeMode,
+                  // � Localization System
+                  locale: locale,
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  supportedLocales: AppLocalizations.supportedLocales,
+
+                  // �🎨 Theme System with dynamic switching
+                  theme: AppTheme.light,
+                  darkTheme: AppTheme.dark,
+                  themeMode: state.themeMode,
+                );
+              },
             );
           },
         ),

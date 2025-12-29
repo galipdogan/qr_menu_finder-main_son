@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/error/error_messages.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/route_names.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
 import '../../../auth/domain/entities/user.dart';
@@ -39,7 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(ErrorMessages.profileTitle),
+        title: Text(AppLocalizations.of(context)!.profileTitle),
         actions: [
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
@@ -56,11 +57,83 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-      body: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          if (state is! AuthAuthenticated) {
-            return const Center(child: Text(ErrorMessages.mustLogin));
+      body: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          // Kullanıcı giriş yaptıktan sonra profil sayfasını yenile
+          if (state is AuthAuthenticated) {
+            AppLogger.i('✅ ProfilePage: User logged in, reloading page');
+            _loadUserReviews();
           }
+        },
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            if (state is! AuthAuthenticated) {
+              // Giriş yapmamış kullanıcı için login ekranı
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.person_outline,
+                        size: 100,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        AppLocalizations.of(context)!.mustLogin,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[700],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppLocalizations.of(context)!.mustLoginForProfile,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          AppLogger.i('🔐 ProfilePage: Redirecting to login');
+                          // Login sayfasına git, giriş yaptıktan sonra profil sayfası otomatik yenilenecek
+                          context.push(RouteNames.login);
+                        },
+                        icon: const Icon(Icons.login),
+                        label: Text(AppLocalizations.of(context)!.loginButton),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 16,
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {
+                          AppLogger.i('📝 ProfilePage: Redirecting to signup');
+                          context.push(RouteNames.signup);
+                        },
+                        child: Text(AppLocalizations.of(context)!.signupPrompt),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
 
           final user = state.user;
 
@@ -331,6 +404,7 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         },
       ),
+      ),
     );
   }
 
@@ -418,15 +492,15 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text(ErrorMessages.logoutTitle),
-          content: const Text(ErrorMessages.logoutConfirm),
+          title: Text(AppLocalizations.of(context)!.logoutTitle),
+          content: Text(AppLocalizations.of(context)!.logoutConfirm),
           actions: [
             TextButton(
               onPressed: () {
                 AppLogger.i('❌ ProfilePage: Logout cancelled');
                 Navigator.of(dialogContext).pop();
               },
-              child: const Text(ErrorMessages.cancel),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             ElevatedButton(
               onPressed: () {

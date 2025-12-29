@@ -1,9 +1,17 @@
 import 'package:dartz/dartz.dart';
-import 'package:qr_menu_finder/core/error/failures.dart';
-import 'package:qr_menu_finder/features/ocr/domain/entities/parsed_menu_item.dart'; // Updated Import
+import '../../../../core/error/failures.dart';
+import '../entities/parsed_menu_item.dart';
 
+/// OCR Repository interface
 abstract class OcrRepository {
+  /// Recognize text from image and parse menu items
   Future<Either<Failure, String>> recognizeText(String imagePath);
+  
+  /// Parse menu items from text
   Future<Either<Failure, List<ParsedMenuItem>>> parseMenuText(String text);
-  Future<Either<Failure, List<ParsedMenuItem>>> extractAndParseMenuItems(String imagePath);
+  
+  /// Full extraction: recognize + parse (main method)
+  Future<Either<Failure, List<ParsedMenuItem>>> extractAndParseMenuItems(
+    String imagePath,
+  );
 }

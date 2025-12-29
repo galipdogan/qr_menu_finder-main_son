@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_menu_finder/core/theme/app_colors.dart';
 import '../../../../core/error/error_messages.dart';
+import '../../../../core/l10n/locale_cubit.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:qr_menu_finder/features/settings/presentation/blocs/settings_bloc.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/theme/theme_bloc.dart';
@@ -82,21 +84,37 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildLanguageTile(BuildContext context, SettingsLoaded state) {
-    return ListTile(
-      leading: const Icon(Icons.language),
-      title: const Text(ErrorMessages.languageTitle),
-      trailing: DropdownButton<String>(
-        value: state.languageCode,
-        items: const [
-          DropdownMenuItem(value: 'tr', child: Text(ErrorMessages.turkish)),
-          DropdownMenuItem(value: 'en', child: Text(ErrorMessages.english)),
-        ],
-        onChanged: (value) {
-          if (value != null) {
-            context.read<SettingsBloc>().add(LanguageChanged(value));
-          }
-        },
-      ),
+    return BlocBuilder<LocaleCubit, Locale>(
+      builder: (context, locale) {
+        return ListTile(
+          leading: const Icon(Icons.language),
+          title: Text(AppLocalizations.of(context)!.languageTitle),
+          subtitle: Text(locale.languageCode == 'tr' 
+              ? AppLocalizations.of(context)!.turkish 
+              : AppLocalizations.of(context)!.english),
+          trailing: DropdownButton<String>(
+            value: locale.languageCode,
+            items: [
+              DropdownMenuItem(
+                value: 'tr', 
+                child: Text(AppLocalizations.of(context)!.turkish)
+              ),
+              DropdownMenuItem(
+                value: 'en', 
+                child: Text(AppLocalizations.of(context)!.english)
+              ),
+            ],
+            onChanged: (value) {
+              if (value != null) {
+                // Update LocaleCubit for instant language change
+                context.read<LocaleCubit>().changeLocale(value);
+                // Also save to settings
+                context.read<SettingsBloc>().add(LanguageChanged(value));
+              }
+            },
+          ),
+        );
+      },
     );
   }
 

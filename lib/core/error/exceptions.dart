@@ -123,3 +123,12 @@ class GeneralException extends AppException {
   @override
   String get userMessage => ErrorMessages.unknownError;
 }
+
+/// OCR-related exceptions (text recognition, image processing failures)
+class OcrException implements Exception {
+  final String message;
+  const OcrException([this.message = 'OCR exception']);
+  
+  @override
+  String toString() => 'OcrException: $message';
+}

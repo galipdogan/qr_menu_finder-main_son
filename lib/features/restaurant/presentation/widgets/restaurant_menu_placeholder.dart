@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/error/error_messages.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/route_names.dart';
 import 'package:go_router/go_router.dart';
@@ -59,7 +60,7 @@ class RestaurantMenuPlaceholder extends StatelessWidget {
                       context.push(RouteNames.menuPath(restaurantId));
                     },
                     icon: const Icon(Icons.menu_book),
-                    label: const Text("Show Menu"),
+                    label: const Text(ErrorMessages.showMenuButton),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: BorderSide(color: AppColors.primary),
@@ -78,7 +79,7 @@ class RestaurantMenuPlaceholder extends StatelessWidget {
                     context.push(RouteNames.addMenuPath(restaurantId));
                   },
                   icon: const Icon(Icons.add, size: 20),
-                  label: const Text('Add Menu'),
+                  label: const Text(ErrorMessages.addMenuButton),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,

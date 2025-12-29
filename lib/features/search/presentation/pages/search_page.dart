@@ -130,20 +130,7 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  void _clearFilters() {
-    setState(() {
-      _selectedCity = null;
-      _selectedDistrict = null;
-      _selectedCategory = null;
-      _minPrice = null;
-      _maxPrice = null;
-      _minRating = null;
-    });
 
-    if (_searchController.text.trim().isNotEmpty) {
-      _performSearch(_searchController.text.trim());
-    }
-  }
 
   bool get _hasActiveFilters =>
       _selectedCity != null ||
@@ -157,14 +144,21 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: AppColors.accent, // Figma stili altın sarısı header
+        elevation: 0,
         title: TextField(
           controller: _searchController,
           autofocus: true,
-          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+          style: const TextStyle(color: Colors.black), // Yazılan yazı siyah
           decoration: InputDecoration(
             hintText: ErrorMessages.searchHint,
-            hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)),
+            hintStyle: TextStyle(
+              color: Colors.black.withValues(alpha: 0.6), // İpucu rengi koyu
+            ),
             border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            filled: false, // AppBar içinde ekstra dolgu istemiyoruz
           ),
           onChanged: _onSearchChanged,
           onSubmitted: (query) {
@@ -174,16 +168,19 @@ class _SearchPageState extends State<SearchPage> {
           },
         ),
         actions: [
-          if (_hasActiveFilters)
+          if (_searchController.text.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: _clearFilters,
-              tooltip: 'Filtreleri Temizle',
+              icon: const Icon(Icons.clear, color: Colors.black),
+              onPressed: () {
+                _searchController.clear();
+                context.read<SearchBloc>().add(SearchCleared());
+                setState(() {});
+              },
             ),
           IconButton(
             icon: Icon(
               Icons.filter_list,
-              color: _hasActiveFilters ? AppColors.warning : null,
+              color: _hasActiveFilters ? AppColors.primary : Colors.black,
             ),
             onPressed: _showFilters,
             tooltip: 'Filtrele',

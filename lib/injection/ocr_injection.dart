@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 
 import '../features/ocr/data/datasources/ocr_remote_data_source.dart';
+import '../features/ocr/data/datasources/menu_parser_service.dart';
 import '../features/ocr/data/repositories/ocr_repository_impl.dart';
 import '../features/ocr/domain/repositories/ocr_repository.dart';
 import '../features/ocr/domain/usecases/extract_and_parse_menu_items_from_image.dart';
@@ -25,9 +26,13 @@ void injectOcr(GetIt sl) {
 
   // Repository
   sl.registerLazySingleton<OcrRepository>(
-    () => OcrRepositoryImpl(remoteDataSource: sl()),
+    () => OcrRepositoryImpl(
+      remoteDataSource: sl(),
+      menuParser: sl(), // Enhanced menu parser
+    ),
   );
 
-  // DataSource
+  // DataSources
   sl.registerLazySingleton<OcrRemoteDataSource>(() => MLKitOcrDataSourceImpl());
+  sl.registerLazySingleton<MenuParserService>(() => MenuParserService());
 }

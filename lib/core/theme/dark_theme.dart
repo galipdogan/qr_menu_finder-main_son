@@ -29,61 +29,66 @@ final ThemeData darkTheme = ThemeData(
   ),
   cardTheme: CardThemeData(
     color: AppColors.surfaceDark,
-    elevation: 2,
+    elevation: 4,
     shadowColor: const Color(0x40000000),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(24), // Daha yuvarlak kartlar
     ),
   ),
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
     backgroundColor: AppColors.primary,
     foregroundColor: AppColors.textOnPrimary,
-    elevation: 4,
+    elevation: 6,
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: AppColors.primary,
       foregroundColor: AppColors.textOnPrimary,
-      elevation: 0,
+      elevation: 2,
+      shadowColor: const Color(0x40000000),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(50), // Pill-shaped butonlar
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
     ),
   ),
   outlinedButtonTheme: OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
       foregroundColor: AppColors.primary,
-      side: const BorderSide(color: AppColors.primary),
+      side: const BorderSide(color: AppColors.primary, width: 2),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(50), // Pill-shaped
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
     ),
   ),
   textButtonTheme: TextButtonThemeData(
     style: TextButton.styleFrom(
       foregroundColor: AppColors.primary,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
     ),
   ),
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
     fillColor: const Color(0xFF2C2C2C),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(20), // Daha yuvarlak input
       borderSide: const BorderSide(color: AppColors.borderDark),
     ),
     enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(20),
       borderSide: const BorderSide(color: AppColors.borderDark),
     ),
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(20),
       borderSide: const BorderSide(color: AppColors.primary, width: 2),
     ),
     errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(20),
       borderSide: const BorderSide(color: AppColors.error),
     ),
   ),

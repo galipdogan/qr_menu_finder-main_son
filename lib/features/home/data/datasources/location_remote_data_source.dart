@@ -72,10 +72,33 @@ class LocationRemoteDataSourceImpl implements LocationRemoteDataSource {
     );
   }
   
+  
+  /// Koordinatlardan konum adını al (Reverse Geocoding)
   @override
-  Future<String> getLocationName(Location location) {
-    // TODO: implement getLocationName
-    throw UnimplementedError();
+  Future<String> getLocationName(Location location) async {
+    try {
+      AppLogger.i('🗺️ Getting location name for: ${location.latitude}, ${location.longitude}');
+      
+      // Nominatim reverse geocoding kullan
+      final locationName = await nominatimService.reverseGeocode(
+        latitude: location.latitude,
+        longitude: location.longitude,
+      );
+      
+      if (locationName != null && locationName.isNotEmpty) {
+        AppLogger.i('✅ Location name: $locationName');
+        return locationName;
+      }
+      
+      // Fallback: Koordinatları döndür
+      AppLogger.w('⚠️ No address found, using coordinates');
+      return '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}';
+      
+    } catch (e) {
+      AppLogger.e('❌ Error getting location name: $e');
+      // Hata durumunda koordinatları döndür
+      return '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}';
+    }
   }
 
   @override

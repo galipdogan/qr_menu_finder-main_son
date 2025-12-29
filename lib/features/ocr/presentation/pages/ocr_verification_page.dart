@@ -92,7 +92,7 @@ class _OcrVerificationPageState extends State<OcrVerificationPage> {
                 name: nameController.text,
                 price: double.tryParse(priceController.text) ?? item.price,
                 currency: item.currency,
-                raw: item.raw,
+                rawText: item.rawText,
               );
               Navigator.pop(context, updatedItem);
             },

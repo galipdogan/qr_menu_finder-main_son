@@ -1,14 +1,20 @@
 import 'package:dartz/dartz.dart';
-import 'package:qr_menu_finder/core/error/failures.dart';
-import 'package:qr_menu_finder/core/utils/repository_helper.dart';
-import 'package:qr_menu_finder/features/ocr/domain/repositories/ocr_repository.dart';
-import 'package:qr_menu_finder/features/ocr/data/datasources/ocr_remote_data_source.dart';
-import 'package:qr_menu_finder/features/ocr/domain/entities/parsed_menu_item.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/error/exceptions.dart';
+import '../../../../core/utils/repository_helper.dart';
+import '../../domain/repositories/ocr_repository.dart';
+import '../../domain/entities/parsed_menu_item.dart';
+import '../datasources/ocr_remote_data_source.dart';
+import '../datasources/menu_parser_service.dart';
 
 class OcrRepositoryImpl implements OcrRepository {
   final OcrRemoteDataSource remoteDataSource;
+  final MenuParserService menuParser;
 
-  OcrRepositoryImpl({required this.remoteDataSource});
+  OcrRepositoryImpl({
+    required this.remoteDataSource,
+    required this.menuParser,
+  });
 
   @override
   Future<Either<Failure, String>> recognizeText(String imagePath) async {
@@ -22,19 +28,33 @@ class OcrRepositoryImpl implements OcrRepository {
   Future<Either<Failure, List<ParsedMenuItem>>> parseMenuText(
     String text,
   ) async {
-    return RepositoryHelper.execute(
-      () => remoteDataSource.parseMenuText(text),
-      (items) => items as List<ParsedMenuItem>,
-    );
+    try {
+      // Use enhanced menu parser
+      final items = await menuParser.parseMenuItems(text);
+      return Right(items);
+    } on OcrException catch (e) {
+      return Left(OcrFailure(e.message));
+    } on Exception catch (e) {
+      return Left(OcrFailure('Menu parsing failed: $e'));
+    }
   }
 
   @override
   Future<Either<Failure, List<ParsedMenuItem>>> extractAndParseMenuItems(
     String imagePath,
   ) async {
-    return RepositoryHelper.execute(
-      () => remoteDataSource.extractAndParseMenuItems(imagePath),
-      (items) => items as List<ParsedMenuItem>,
-    );
+    try {
+      // Step 1: Recognize text using ML Kit
+      final text = await remoteDataSource.recognizeText(imagePath);
+      
+      // Step 2: Parse menu items using enhanced parser
+      final items = await menuParser.parseMenuItems(text);
+      
+      return Right(items);
+    } on OcrException catch (e) {
+      return Left(OcrFailure(e.message));
+    } on Exception catch (e) {
+      return Left(OcrFailure('OCR extraction failed: $e'));
+    }
   }
 }
