@@ -4,7 +4,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-// import '../../../menu/data/services/mlkit_ocr_service.dart'; // Removed
 import '../../../../injection_container.dart' as di; // Import di
 import '../../../ocr/domain/usecases/extract_and_parse_menu_items_from_image.dart'; // New import
 import '../../../ocr/domain/entities/parsed_menu_item.dart'; // New import

@@ -56,7 +56,7 @@ class _AddMenuPageState extends State<AddMenuPage> {
         // Navigate to OCR verification page instead of uploading
         if (mounted) {
           context.push(
-            '/ocr-verification/${widget.restaurantId}',
+            '/restaurant/${widget.restaurantId}/ocr',
             extra: {'imagePath': _selectedImage!.path},
           );
         }
